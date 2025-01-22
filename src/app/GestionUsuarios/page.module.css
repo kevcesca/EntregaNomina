@@ -1,0 +1,141 @@
+
+.container {
+    padding: 20px;
+}
+
+.title {
+    margin-bottom: 20px;
+    font-size: 35px;
+    font-weight: bold;
+    text-align: center; /* Centrar el título para darle más protagonismo */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #fff; /* Fondo blanco para mayor claridad */
+}
+
+.table th,
+.table td {
+    border: 1px solid #ddd;
+    padding: 12px; /* Incrementar padding para mayor legibilidad */
+    text-align: left;
+    vertical-align: middle; /* Centrar contenido verticalmente */
+    font-size: 14px; /* Unificar tamaño de fuente */
+}
+
+.table th {
+    background-color: #9b1d1d !important;
+    color: white !important;
+    /* Opcional: hacer que los encabezados destaquen */
+    font-size: 13px;
+}
+
+.table td:first-child,
+.table th:first-child {
+    text-align: center; /* Centrar los checkboxes */
+   
+}
+
+.table td:last-child,
+.table th:last-child {
+    width: 120px; /* Ancho fijo para la columna de opciones */
+    text-align: center; /* Centrar los botones o íconos */
+}
+
+.table tbody tr:hover {
+    background-color: #235b4e; /* Resaltar fila al pasar el mouse */
+    color: white;
+    transition: background-color 0.3s ease; /* Suavizar el efecto */
+}
+
+.disabledRow {
+    opacity: 0.6; /* Reducir la opacidad para destacar que está deshabilitado */
+    background-color: #b3b3b367; 
+    color: rgb(0, 0, 0) !important;/* Fondo rojo para fila deshabilitada */
+}
+
+.disabledRow td:last-child {
+    opacity: 1 !important;
+    background-color: #ddd 0.5s ease !important; /* Mantener la visibilidad completa del botón de opciones */
+}
+
+/* Cambiar el color de los tres puntos (ícono de opciones) a negro cuando esté deshabilitado */
+.disabledRow td:last-child .MuiIconButton-root {
+    color: black !important; /* Cambiar el color del ícono a negro */
+    opacity: 1 !important; /* Asegurar que el ícono tenga opacidad total */
+}
+
+.disabledRow td:last-child .MuiSvgIcon-root {
+    color: black !important; /* Asegurar que el ícono SVG de MoreVertIcon también sea negro */
+}
+
+.modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 400px;
+    background-color: white;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+    padding: 20px;
+    z-index: 1000;
+}
+
+.modal h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 20px;
+    color: #333;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form button {
+    margin-top: 15px;
+}
+
+form .MuiButton-root {
+    height: 45px;
+    font-weight: bold;
+}
+
+.provisionalPasswordMessage {
+    font-size: 14px; /* Tamaño de letra moderado */
+    color: #555; /* Color gris oscuro para buena legibilidad */
+    margin: 10px 0; /* Espaciado hacia arriba y abajo */
+    text-align: justify; /* Alineación justificada */
+    font-weight: bold;
+}
+
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.rowWidth{
+    max-width: 15vw;
+    min-width: 9vw;
+}
+
+.wordNoWrap{
+    word-wrap: break-word;
+}
+
+.sticky{
+    margin-right: 15rem !important;
+}
+
+.buttons{
+    display: flex;
+    justify-content: space-between;
+}

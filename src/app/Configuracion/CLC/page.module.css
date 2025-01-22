@@ -1,0 +1,208 @@
+/* clc.module.css */
+
+.container {
+    position: relative;
+    right: -250px;
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+  }
+  
+  .h2 {
+    background-color: #ab9144;
+    color: white;
+    padding: 1em;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .th,
+  .td {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+  }
+  
+  .th {
+    background-color: #1f5841;
+    color: #fff;
+  }
+  
+  .btn {
+    background-color: #9f2241;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    margin-bottom: 12px;
+  }
+  
+  .btn:hover {
+    background-color: #711c31;
+  }
+  
+  .formGroup {
+    margin: 15px 0;
+  }
+  
+  .formGroup label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .formGroup input[type="text"],
+  .formGroup input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .row input[type="text"],
+  .row input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .column input[type="num"],
+  .column input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .detalleClc {
+    margin-top: 20px;
+  }
+  
+  .accionBoton {
+    text-align: center;
+  }
+  
+  /* Estilo para las celdas con checkbox */
+  .table th input[type="checkbox"],
+  .table td input[type="checkbox"] {
+    margin: 0 auto;
+    display: block;
+    cursor: pointer;
+  }
+  
+  /* Checkbox global en la cabecera */
+  .table th input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+  }
+  
+  /* Espaciado entre las celdas */
+  .table td,
+  .table th {
+    padding: 12px;
+    text-align: center;
+  }
+  
+  /* Contenedor para los botones de exportación */
+  .iconosExportacion {
+    display: flex;
+    justify-content: center; /* Centramos los botones */
+    gap: 10px; /* Espaciado entre los botones */
+    margin-top: 20px;
+  }
+  
+  /* Estilo común para todos los botones */
+  .btnExportar {
+    padding: 6px 12px; /* Reducimos el padding para hacer los botones más pequeños */
+    background-color: #007bff; /* Color de fondo azul */
+    color: white; /* Color de texto */
+    border: none;
+    border-radius: 4px; /* Radio más pequeño para bordes redondeados */
+    font-size: 14px; /* Fuente más pequeña */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  /* Efecto al pasar el mouse sobre el botón */
+  .btnExportar:hover {
+    background-color: #0056b3; /* Color de fondo al hacer hover */
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño del botón */
+  }
+  
+  /* Efecto para el primer botón (Exportar a PDF) */
+  .btnExportar:first-child {
+    background-color: #e74c3c; /* Rojo para el PDF */
+  }
+  
+  .btnExportar:first-child:hover {
+    background-color: #c0392b; /* Rojo oscuro para hover */
+  }
+  
+  /* Efecto para el segundo botón (Exportar a Excel) */
+  .btnExportar:nth-child(2) {
+    background-color: #237738; /* Verde para el Excel */
+  }
+  
+  .btnExportar:nth-child(2):hover {
+    background-color: #005e0c; /* Verde oscuro para hover */
+  }
+  
+  /* Efecto para el tercer botón (Exportar a CSV) */
+  .btnExportar:last-child {
+    background-color: #237738; /* Naranja para el CSV */
+  }
+  
+  .btnExportar:last-child:hover {
+    background-color: #005e0c; /* Naranja oscuro para hover */
+  }
+  
+  /* Estilo para la fila (row) que contiene clave y monto */
+  .row {
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem; /* Espaciado entre filas */
+  }
+  
+  /* Estilo para las columnas (clave y monto) */
+  .column {
+    flex: 1; /* Ocupa el mismo espacio para ambas columnas */
+    margin-right: 1rem; /* Espaciado entre columnas */
+  }
+  
+  .column:last-child {
+    margin-right: 0; /* La última columna no necesita margen derecho */
+  }
+  
+  .label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem; /* Espaciado entre la etiqueta y el input */
+  }
+  
+  .input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  
+  

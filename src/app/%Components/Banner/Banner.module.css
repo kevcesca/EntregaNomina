@@ -1,0 +1,31 @@
+.bannerContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #711c31 !important; /* Color primario oscuro */
+    color: #fff !important; /* Color del texto */
+    padding: 3rem;
+    margin: 5rem auto;
+    border-radius: 10px;
+}
+
+.textContainer {
+    width: 50%;
+    padding: 20px;
+}
+
+.imageContainer {
+    position: relative;
+    width: 50%;
+    height: 300px;
+}
+
+.title {
+    margin-bottom: 20px;
+}
+
+.button {
+    background-color: #bc955c !important; /* Color secundario principal */
+    color: #fff !important;
+    margin-top: 2rem !important;
+}

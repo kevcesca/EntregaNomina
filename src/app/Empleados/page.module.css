@@ -1,0 +1,44 @@
+/* src/app/page.module.css */
+.main {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.selectionBox {
+    border: 1px solid #bc955c;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.selectionTitle {
+    color: #bc955c;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.columnsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.generateButton {
+    margin-top: 20px;
+    background-color: #bc955c;
+    color: white;
+}
+
+.generateButton:hover {
+    background-color: #995c2c;
+}
+
+.h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}

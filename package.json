@@ -9,8 +9,27 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.1",
+    "@mui/material": "^6.4.1",
+    "@mui/x-data-grid": "^7.24.0",
+    "@mui/x-date-pickers": "^7.24.0",
+    "axios": "^1.7.9",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "file-saver": "^2.0.5",
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.4",
+    "next": "15.1.5",
+    "papaparse": "^5.5.1",
+    "primeicons": "^7.0.0",
+    "primereact": "^10.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.5"
+    "react-multi-carousel": "^2.8.5",
+    "react-pro-sidebar": "^1.1.0",
+    "react-toastify": "^11.0.3",
+    "xlsx": "^0.18.5"
   }
 }

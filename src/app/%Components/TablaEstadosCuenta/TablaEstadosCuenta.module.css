@@ -1,0 +1,50 @@
+.card {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dataTable {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.card {
+    padding: 1rem;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataTable .p-datatable-thead > tr > th {
+    background-color: #0D375C;
+    color: white;
+    border: 1px solid #0D375C;
+}
+
+.headerText {
+    color: #0D375C;
+    font-weight: bold;
+}
+
+.downloadButton {
+    background-color: #0D375C;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.downloadButton:hover {
+    background-color: #0a2a45;
+}
+
+.p-datatable-tbody > tr > td {
+    border: 1px solid #ccc;
+}

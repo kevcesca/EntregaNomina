@@ -1,0 +1,11 @@
+.progressContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 16px 0;
+}
+
+.loadingSpinner {
+    margin-top: 8px;
+}

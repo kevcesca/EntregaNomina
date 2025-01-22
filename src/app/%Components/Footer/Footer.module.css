@@ -1,0 +1,20 @@
+.footer {
+    background-color: #235b4e;
+    color: #fff;
+    text-align: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    position: relative;
+    width: 99.2vw;
+    bottom: 0;
+    margin-top: 1rem;
+}
+
+.footerContent {
+    margin: 0 auto;
+    max-width: 960px;
+}
+
+.footer p {
+    margin: 0.5rem 0;
+}

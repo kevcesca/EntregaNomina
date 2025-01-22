@@ -1,0 +1,140 @@
+/* src/app/comparative/page.module.css */
+.main {
+    padding: 20px;
+    overflow-x: auto;
+    min-height: 100vh;
+}
+
+.h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: white;
+    background-color: #bc955c;
+    padding: 1rem;
+    border-radius: 10px;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 4rem;
+}
+
+.legendItem {
+    margin: 0 10px;
+    display: flex;
+    align-items: center;
+}
+
+.legendColor {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.noCoinciden {
+    color: white;
+    background-color: #9f2241; /* rojo claro */
+}
+
+.cambioCuenta {
+    color: white;
+    background-color: #bc955c; /* naranja claro */
+}
+
+.incompleto {
+    color: white;
+    background-color: #235b4e; /* morado claro */
+}
+
+.table2 {
+    margin-top: 2rem;
+    padding-top: 2rem;
+}
+
+.tableContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: stretch;
+    margin-top: 3rem;
+    border-bottom: 1px solid black;
+}
+
+.selectorContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: baseline;
+}
+
+.buttonContainer {
+    margin-top: 3rem;
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.backButton {
+    color: white !important;
+}
+
+.alert {
+    margin: 2rem;
+}
+
+.tableSelector {
+    width: 60vw;
+    background-color: white;
+    align-self: center;
+    border: 2px solid #9f2241;
+}
+
+.section {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.labels {
+    width: 20vw;
+    height: 6vh;
+    margin: 2rem;
+    margin-right: 1rem !important;
+}
+
+/* Estilos añadidos para HeaderSeccion */
+.headerSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer; /* Indicar que el encabezado es interactivo */
+    background-color: #bc955c; /* Fondo similar al encabezado principal */
+    color: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.headerSection:hover {
+    background-color: #9f7c42; /* Color más oscuro al pasar el cursor */
+}
+
+.headerSectionTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.headerSectionButton {
+    font-size: 1.5rem;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+}

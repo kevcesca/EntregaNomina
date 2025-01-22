@@ -1,0 +1,48 @@
+/* src/app/page.module.css */
+
+.main {
+    min-height: 100vh;
+}
+
+.h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.gridItem1 {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    margin: 2rem;
+}
+
+.dragHandle {
+    cursor: grab;
+    background-color: #f0f0f0;
+    padding: 5px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.botonesExportar{
+    margin: 2rem !important;
+}
+
+.selectorContainer {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+}
+
+.buttonContainer {
+    text-align: center;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.backButton{
+    color: white !important;
+}

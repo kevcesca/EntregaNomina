@@ -1,0 +1,60 @@
+.tableContainer {
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.tableContainer table {
+    table-layout: auto;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.searchBar {
+    flex-grow: 1;
+    margin: 0 1rem;
+}
+
+.tableHeader {
+    font-weight: bold;
+    background-color: #9b1d1d;
+    color: white !important;
+}
+
+.tableCell {
+    text-align: center;
+    white-space: nowrap;
+    width: fit-content;
+}
+
+.modalContent {
+    display: flex;
+    flex-direction: row;
+    width: 80vw;
+}
+
+.leftColumn {
+    margin-right: 2rem;
+}
+
+.tableHead {
+    font-weight: bold;
+    background-color: #9b1d1d;
+    color: white !important;
+}
+
+.tWthite {
+    color: white !important;
+}
+
+.dialog {
+    border: solid #9b1d1d 4px !important;
+}
+
+.tableContainer{
+    width: 98%;
+}

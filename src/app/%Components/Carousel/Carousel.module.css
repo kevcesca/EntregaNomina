@@ -1,0 +1,42 @@
+.carouselContainer {
+    width: 100%;
+}
+
+.images {
+    width: 100%;
+    height: 100%;
+}
+
+.carouselItem {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: none;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.imageContainer {
+    position: relative;
+    width: 50%;
+    height: 300px;
+}
+
+.textContainer {
+    width: 50%;
+    padding: 20px;
+}
+
+.textContainer .MuiTypography-h5 {
+    margin-bottom: 10px;
+}
+
+.textContainer .MuiButton-root {
+    margin-top: 20px;
+}
+
+.boton {
+    margin-top: 2rem !important;
+}

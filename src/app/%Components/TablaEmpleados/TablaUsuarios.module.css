@@ -1,0 +1,42 @@
+.titulo{
+    width: 100%;
+    color: #ffffff;
+    background-color: #235b4e;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0;
+}
+
+.buttons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.exportText {
+    font-size: 20px;
+    color: #333;
+    margin-right: 1rem;
+}
+
+.dropForm{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    translate: 1rem;
+}
+
+.selectAllCheckbox{
+ 
+    background-color: rgba(0, 0, 0, 0.253);
+    text-align: center;
+    text-decoration: double;
+}
+
+.employeeDetails {
+    max-height: 400px;
+    overflow-y: auto;
+}

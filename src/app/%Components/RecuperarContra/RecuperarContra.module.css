@@ -1,0 +1,26 @@
+/* page.module.css */
+.main {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    translate: 0 10rem;
+}
+
+.image {
+    width: 600px; /* Ajusta el tamaño de las imágenes según tus necesidades */
+    height: auto;
+}
+
+.card{
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: white;
+    border-radius: 12px;
+    border: 15px solid #711c31;
+    padding: 2rem;
+}
+
+.tWhite{
+    color: black;
+}

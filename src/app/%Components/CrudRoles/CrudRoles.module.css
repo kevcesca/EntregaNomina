@@ -1,0 +1,143 @@
+.pageContainer {
+    padding: 20px;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.button {
+    padding: 8px 12px;
+    background-color: #b8860b; /* Dorado */
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.button:hover {
+    background-color: #8b6914; /* Dorado más oscuro */
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 15px;
+}
+
+.table th {
+    background-color: #9b1d1d !important;
+    color:white;
+    
+}
+
+.editing {
+    background-color: #f0f8ff; /* Azul claro para campos editables */
+}
+
+.menuButton {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666; /* Gris oscuro */
+    transition: color 0.2s;
+}
+
+.menuButton:hover {
+    color: #333; /* Gris más oscuro */
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+}
+
+.permissionList {
+    margin-top: 10px;
+}
+
+.permissionItem {
+    margin-bottom: 8px;
+}
+
+/* Estilos de botones de acción */
+.actionButton {
+    padding: 5px 10px;
+    margin-right: 5px;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+}
+
+.actionButton.edit {
+    background-color: #b8860b; /* Dorado */
+}
+
+.actionButton.edit:hover {
+    background-color: #8b6914; /* Dorado más oscuro */
+}
+
+.actionButton.delete {
+    background-color: #dc3545; /* Rojo */
+}
+
+.actionButton.delete:hover {
+    background-color: #c82333; /* Rojo más oscuro */
+}
+
+.permissionsCell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addPermissionButton {
+    margin-left: 8px;
+    color: #1976d2; /* Color azul */
+}
+
+.buttonSave {
+    margin-right: 8px;
+}
+
+.buttonCancel {
+    margin-left: 8px;
+}
+
+.botonesAceptCancel{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 10vw;
+}

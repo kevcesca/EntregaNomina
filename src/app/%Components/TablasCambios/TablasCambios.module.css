@@ -1,0 +1,19 @@
+.titulo{
+    width: 100%;
+    color: #ffffff;
+    background-color: #235b4e !important;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+    margin: 0;
+}
+
+.ColumnSelector{
+    position: absolute;
+    translate: 0 500;
+}
+
+.botonFiltro{
+    position: absolute !important;
+    translate: 1rem 1rem;
+}

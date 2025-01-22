@@ -1,0 +1,18 @@
+/* src/%Components/HeaderSeccion/HeaderSeccion.module.css */
+.h2 {
+    background-color: #bc955c;
+    color: white;
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    width: 100%;
+    cursor: pointer; /* Habilitar clic en el encabezado */
+}
+
+.buttonPlus {
+    border: none;
+    color: #bc955c;
+    font-size: 1.5rem !important;
+    cursor: pointer;
+    border-radius: 4px;
+}

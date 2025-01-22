@@ -1,0 +1,36 @@
+.card {
+    margin: 20px;
+}
+
+.scrollContainer {
+    overflow-x: auto;
+}
+
+.dataTable {
+    width: 100%;
+}
+
+.noCoinciden {
+    color: white;
+    background-color: #9f2241; /* rojo claro */
+}
+
+.cambioCuenta {
+    color: white;
+    background-color: #bc955c; /* naranja claro */
+}
+
+.incompleto {
+    color: white;
+    background-color: #235b4e; /* morado claro */
+}
+
+
+
+
+.button{
+    color: white;
+    background-color: #9f2241;
+    margin-top: 2rem;
+
+}

@@ -1,0 +1,39 @@
+.wrapperContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.collapsed {
+    margin-left: 0 !important;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+/* Clase para fijar la sidebar */
+.sidebarFixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 999;
+    transition: width 0.3s ease;
+    overflow-y: auto; /* Para agregar un scrollbar si la sidebar es muy alta */
+    background-color: #fff; /* O el color que necesites para tu sidebar */
+}
+
+.footer {
+    /* Ajustes opcionales para el footer */
+}
+
+.loaderContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}

@@ -1,0 +1,107 @@
+.customHeader {
+    background-color: #9f2241  !important; /* Color de fondo rojo */
+    color: white !important; /* Opcional: texto blanco */
+}
+
+.card {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: ;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dataTable {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.card {
+    padding: 1rem;
+}
+
+.dataTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.dataTable .p-datatable-thead > tr > th {
+    background-color: #9f2241 !important;
+    color: #9f2241 !important;
+    border: 1px solid #9f2241 !important
+}
+
+.headerText {
+    color: #0D375C;
+    font-weight: bold;
+}
+
+.downloadButton {
+    background-color: #0D375C;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+
+.downloadButton:hover {
+    background-color: #0a2a45;
+}
+
+.p-datatable-tbody > tr > td {
+    border: 1px solid #9f2241 !important;
+}
+
+.Espacio{
+    margin-right: 2rem;
+}
+
+.uploadContainer{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem;
+}
+
+.downloadButton {
+    background-color: #9f2241 !important; /* Color de fondo por defecto */
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.downloadButton:disabled {
+    background-color: #cccccc !important; /* Color de fondo cuando está deshabilitado */
+    color: #666666 !important; /* Color del icono cuando está deshabilitado */
+    cursor: not-allowed; /* Cambia el cursor a not-allowed */
+}
+
+.downloadButton:disabled .pi {
+    color: #666666; /* Asegura que el icono también cambie de color */
+}
+
+.loadingContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.deleteButton{
+background-color: #9f2241 !important; /* Color de fondo por defecto */
+border: none;
+padding: 8px;
+border-radius: 4px;
+color: white;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+}
