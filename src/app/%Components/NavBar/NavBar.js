@@ -6,29 +6,16 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import MenuIcon from '@mui/icons-material/Menu';
 import PeopleIcon from '@mui/icons-material/People';
 import SecurityIcon from '@mui/icons-material/Security';
-import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import AssessmentIcon from '@mui/icons-material/Assessment';
-import CloudIcon from '@mui/icons-material/Cloud';
 import DescriptionIcon from '@mui/icons-material/Description';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import MoneyIcon from '@mui/icons-material/Money';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import EditIcon from '@mui/icons-material/Edit';
 import ListIcon from '@mui/icons-material/List';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import AccessibilityNewIcon from '@mui/icons-material/AccessibilityNew';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import CreditScoreIcon from '@mui/icons-material/CreditScore';
 import PaymentsTwoToneIcon from '@mui/icons-material/PaymentsTwoTone';
-import CreditCardOffIcon from '@mui/icons-material/CreditCardOff';
 import { useMediaQuery } from '@mui/material';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 import KeySharpIcon from '@mui/icons-material/KeySharp';
-import CancelPresentationSharpIcon from '@mui/icons-material/CancelPresentationSharp';
 import ProtectedComponent from '../ProtectedComponent/ProtectedComponent';
 import { API_USERS_URL } from '../../%Config/apiConfig';
 
@@ -129,11 +116,9 @@ export default function NavBar() {
                             requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Usuarios" icon={<PeopleIcon />}>
-                                <Link className={styles.tWhite} href="/GestionUsuarios" passHref>
-                                    <MenuItem icon={<PeopleIcon />} className={styles.bgblack} onClick={handleLinkClick}>
-                                        Usuarios
-                                    </MenuItem>
-                                </Link>
+                                <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick} component={<Link href="/GestionUsuarios" className={styles.tWhite} />}>
+                                    Usuarios
+                                </MenuItem>
                             </SubMenu>
                         </ProtectedComponent>
 
@@ -141,11 +126,9 @@ export default function NavBar() {
                         <ProtectedComponent userPermissions={permissions}
                             requiredPermissions={['Acceso_total']}
                         >
-                            <Link className={styles.textAlone} href="/GestionUsuarios" passHref>
-                                <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick}>
-                                    Usuarios
-                                </MenuItem>
-                            </Link>
+                            <MenuItem icon={<PeopleIcon />} onClick={handleLinkClick} component={<Link href="/GestionUsuarios" className={styles.tWhite} />}>
+                                Usuarios
+                            </MenuItem>
                         </ProtectedComponent>
                     )}
 
@@ -154,18 +137,14 @@ export default function NavBar() {
                             requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Roles" icon={<KeySharpIcon />}>
-                                <Link className={styles.tWhite} href="/Roles" passHref>
-                                    <MenuItem icon={<KeySharpIcon />} className={styles.bgblack} onClick={handleLinkClick}>Roles</MenuItem>
-                                </Link>
+                                <MenuItem icon={<KeySharpIcon />} className={styles.bgblack} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Roles" />} >Roles</MenuItem>
                             </SubMenu>
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
                             requiredPermissions={['Acceso_total']}
                         >
-                            <Link className={styles.textAlone} href="/Roles" passHref>
-                                <MenuItem icon={<KeySharpIcon />} onClick={handleLinkClick}>Roles</MenuItem>
-                            </Link>
+                            <MenuItem icon={<KeySharpIcon />} className={styles.bgblack} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Roles" />} >Roles</MenuItem>
                         </ProtectedComponent>
                     )}
 
@@ -173,18 +152,10 @@ export default function NavBar() {
                         requiredPermissions={['Acceso_total']}
                     >
                         <SubMenu label="Proceso de Nómina" icon={<SecurityIcon />}>
-                            <Link className={styles.tWhite} href="/CrearNomina" passHref>
-                                <MenuItem icon={<UploadFileIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cargar Nómina</MenuItem>
-                            </Link>
-                            <Link className={styles.tWhite} href="/Validacion" passHref>
-                                <MenuItem icon={<EditIcon />} className={styles.bgblack} onClick={handleLinkClick}>Cambios de la Nómina</MenuItem>
-                            </Link>
-                            <Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" passHref>
-                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Resumen de la Nómina</MenuItem>
-                            </Link>
-                            <Link className={styles.tWhite} href="/AprobarCargaNomina" passHref>
-                                <MenuItem icon={<CheckCircleIcon />} className={styles.bgblack} onClick={handleLinkClick}>Aprobar nómina</MenuItem>
-                            </Link>
+                            <MenuItem icon={<UploadFileIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/CrearNomina" />}>Cargar Nómina</MenuItem>
+                            <MenuItem icon={<EditIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Validacion" />}>Cambios de la Nómina</MenuItem>
+                            <MenuItem icon={<AssessmentIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/CrearNomina/ProcesarDatos" />}>Resumen de la Nómina</MenuItem>
+                            <MenuItem icon={<CheckCircleIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/AprobarCargaNomina" />}>Aprobar nómina</MenuItem>
                         </SubMenu>
                     </ProtectedComponent>
 
@@ -192,15 +163,9 @@ export default function NavBar() {
                         requiredPermissions={['Acceso_total']}
                     >
                         <SubMenu label="Gestión de Nómina" icon={<SettingsIcon />}>
-                            <Link className={styles.tWhite} href="/Configuracion/Conceptos" passHref>
-                                <MenuItem icon={<ListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Conceptos</MenuItem>
-                            </Link>
-                            <Link className={styles.tWhite} href="/Configuracion/Universos" passHref>
-                                <MenuItem icon={<ViewListIcon />} className={styles.bgblack} onClick={handleLinkClick}>Universos</MenuItem>
-                            </Link>
-                            <Link className={styles.tWhite} href="/Configuracion/CLC" passHref>
-                                <MenuItem icon={<PaymentsTwoToneIcon />} className={styles.bgblack} onClick={handleLinkClick}>CLC</MenuItem>
-                            </Link>
+                            <MenuItem icon={<ListIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Configuracion/Conceptos" />}>Conceptos</MenuItem>
+                            <MenuItem icon={<ViewListIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Configuracion/Universos" />}>Universos</MenuItem>
+                            <MenuItem icon={<PaymentsTwoToneIcon />} className={styles.tWhite} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/Configuracion/CLC" />}>CLC</MenuItem>
                         </SubMenu>
                     </ProtectedComponent>
 
@@ -209,18 +174,14 @@ export default function NavBar() {
                             requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Estados de cuenta" icon={<DescriptionIcon />}>
-                                <Link className={styles.tWhite} href="/CargarEstadosCuenta" passHref>
-                                    <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick}>Estados de cuenta</MenuItem>
-                                </Link>
+                                <MenuItem icon={<DescriptionIcon />} className={styles.bgblack} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/CargarEstadosCuenta" />}>Estados de cuenta</MenuItem>
                             </SubMenu>
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
                             requiredPermissions={['Acceso_total']}
                         >
-                            <Link className={styles.textAlone} href="/CargarEstadosCuenta" passHref>
-                                <MenuItem icon={<DescriptionIcon />} onClick={handleLinkClick}>Estados de cuenta</MenuItem>
-                            </Link>
+                            <MenuItem icon={<DescriptionIcon />} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/CargarEstadosCuenta" />}>Estados de cuenta</MenuItem>
                         </ProtectedComponent>
                     )}
 
@@ -230,18 +191,14 @@ export default function NavBar() {
                             requiredPermissions={['Acceso_total']}
                         >
                             <SubMenu label="Reportes" icon={<AssessmentIcon />}>
-                                <Link className={styles.tWhite} href="/ListaReportes" passHref>
-                                    <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick}>Reportes</MenuItem>
-                                </Link>
+                                <MenuItem icon={<AssessmentIcon />} className={styles.bgblack} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/ListaReportes" />}>Reportes</MenuItem>
                             </SubMenu>
                         </ProtectedComponent>
                     ) : (
                         <ProtectedComponent userPermissions={permissions}
                             requiredPermissions={['Acceso_total']}
                         >
-                            <Link className={styles.textAlone} href="/ListaReportes" passHref>
-                                <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick}>Reportes</MenuItem>
-                            </Link>
+                            <MenuItem icon={<AssessmentIcon />} onClick={handleLinkClick} component={<Link className={styles.tWhite} href="/ListaReportes" />}>Reportes</MenuItem>
                         </ProtectedComponent>
                     )}
                 </Menu>
