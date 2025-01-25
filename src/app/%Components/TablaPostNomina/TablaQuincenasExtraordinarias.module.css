@@ -1,0 +1,171 @@
+/* Encabezados de la tabla */
+.customHeader {
+    background-color: #9f2241 !important; /* Fondo rojo oscuro */
+    color: white !important; /* Texto blanco */
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px; /* Tamaño de la fuente */
+    border: 1px solid #9f2241 !important;
+}
+
+/* Estilo para la tarjeta */
+.card {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fdfdfd; /* Fondo blanco */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Espaciado y ancho de la tabla */
+.dataTable {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+/* Encabezados de las columnas */
+.dataTable .p-datatable-thead > tr > th {
+    background-color: #9f2241 !important; /* Fondo rojo oscuro */
+    color: white !important; /* Texto blanco */
+    border: 1px solid #9f2241 !important;
+}
+
+/* Estilo de las filas */
+.p-datatable-tbody > tr > td {
+    border: 1px solid #ccc !important;
+    text-align: center; /* Centrar contenido */
+}
+
+/* Contenedor de controles */
+.controls {
+    display: flex; /* Alinear los elementos en fila */
+    justify-content: space-between; /* Uno a la izquierda, uno en el centro y otro a la derecha */
+    align-items: center; /* Alinear verticalmente al centro */
+    margin-top: 2rem; /* Separación del contenido superior */
+    padding: 0 2rem; /* Opcional: Agrega un padding horizontal */
+    gap: 1rem; /* Espaciado entre los elementos si es necesario */
+}
+
+
+
+/* Botón de subida */
+.uploadButton {
+    width: 150px; /* Botón más pequeño */
+    background-color: #9f2241 !important; /* Fondo rojo */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.4rem 0.8rem;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.uploadButton:hover {
+    background-color: #7a1b33 !important; /* Fondo más oscuro al pasar el cursor */
+}
+
+.uploadButton:disabled {
+    background-color: #cccccc !important; /* Fondo gris deshabilitado */
+    color: #666666 !important; /* Texto gris deshabilitado */
+    cursor: not-allowed; /* Cursor deshabilitado */
+}
+
+
+/* Botón de procesar nómina */
+/* Botón de procesar nómina */
+.procesarButton {
+    width: 250px; /* Ancho uniforme */
+    background-color: #9f2241 !important; /* Fondo rojo */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.procesarButton:hover {
+    background-color: #7a1b33 !important; /* Fondo más oscuro al pasar el cursor */
+}
+
+/* Botón de descarga */
+/* Botón de descarga */
+.downloadButton {
+    background-color: #9f2241 !important; /* Fondo rojo oscuro */
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-align: center;
+}
+
+.downloadButton:hover {
+    background-color: #7a1b33 !important; /* Fondo más oscuro al pasar el cursor */
+}
+
+.downloadButton:disabled {
+    background-color: #cccccc !important; /* Fondo gris deshabilitado */
+    color: #666666 !important; /* Texto gris deshabilitado */
+    cursor: not-allowed;
+}
+
+/* Botón de eliminar */
+.deleteButton {
+    background-color: #9f2241 !important; /* Fondo rojo para eliminar */
+    border: none;
+    padding: 8px;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-align: center;
+}
+
+.deleteButton:hover {
+    background-color: #c82333 !important; /* Fondo más oscuro al pasar el cursor */
+}
+
+/* Contenedor de subida */
+.uploadContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem;
+}
+
+
+/* Espaciado uniforme */
+.Espacio {
+    margin-right: 1rem;
+}
+
+/* Contenedor de carga */
+.loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.disabledButton {
+    background-color: #cccccc !important; /* Fondo gris deshabilitado */
+    color: #666666 !important; /* Texto gris deshabilitado */
+    cursor: not-allowed !important; /* Cursor deshabilitado */
+}
+
+.select {
+    width: 300px; /* Ancho uniforme */
+    text-align: center; /* Centrar contenido del select */
+}
