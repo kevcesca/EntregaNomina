@@ -4,16 +4,19 @@
     border-radius: 8px;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    
 }
 
 .dataTable {
     width: 100%;
     border: 1px solid #ccc;
     border-radius: 8px;
+    
 }
 
 .card {
     padding: 1rem;
+    
 }
 
 .dataTable {
@@ -30,6 +33,7 @@
 .headerText {
     color: #0D375C;
     font-weight: bold;
+    
 }
 
 .downloadButton {
@@ -47,4 +51,10 @@
 
 .p-datatable-tbody > tr > td {
     border: 1px solid #ccc;
+    
+}
+
+.verInfo {
+    position: flex ;
+    text-align: center;
 }
