@@ -17,6 +17,8 @@ import DateFilter from '../../%Components/DateFilter/DateFilter';
 import ProtectedView from '../../%Components/ProtectedView/ProtectedView';
 import HeaderSeccion from '../../%Components/HeaderSeccion/HeaderSeccion'; // Importar HeaderSeccion
 import AsyncButton from '../../%Components/AsyncButton/AsyncButton';
+import ReusableTableDepositoResumen from '../../%Components/ReusableTableDepositoResumen/ReusableTableDepositoResumen';
+
 
 const CargarDatos = () => {
     const router = useRouter();
@@ -145,8 +147,20 @@ const CargarDatos = () => {
                         isOpen={showDepositos}
                     />
                     {showDepositos && (
-                        <DepositoResumen resumenData={depositoData} anio={anio} quincena={quincena} />
+                        <ReusableTableDepositoResumen
+                            endpoint="NominaCtrl/BancosNoNulos"
+                            anio={anio} // <-- Aquí pasas el año seleccionado
+                            quincena={quincena} // <-- Aquí pasas la quincena seleccionada
+                            onRowClick={(row) => {
+                                const { ANIO, QUINCENA, NOMINA, BANCO } = row;
+                                router.push(
+                                    `/CrearNomina/ProcesarDatos/DetalleEmpleados?anio=${ANIO}&quincena=${QUINCENA}&nomina=${NOMINA}&banco=${BANCO}`
+                                );
+                            }}
+                        />
+
                     )}
+
 
                     {/* Encabezado y tabla de Cheques Resumen */}
                     <HeaderSeccion
@@ -155,7 +169,18 @@ const CargarDatos = () => {
                         isOpen={showCheques}
                     />
                     {showCheques && (
-                        <ChequesResumen resumenData={chequesData} anio={anio} quincena={quincena} />
+                        <ReusableTableDepositoResumen
+                            endpoint="NominaCtrl/BancosNulos"
+                            anio={anio}
+                            quincena={quincena}
+                            onRowClick={(row) => {
+                                const { ANIO, QUINCENA, NOMINA, BANCO } = row;
+                                router.push(
+                                    `/CrearNomina/ProcesarDatos/DetalleEmpleados?anio=${ANIO}&quincena=${QUINCENA}&nomina=${NOMINA}&banco=${BANCO}`
+                                );
+                            }}
+                        />
+
                     )}
 
                     {/* Encabezado y tabla de Totales */}
@@ -165,7 +190,18 @@ const CargarDatos = () => {
                         isOpen={showTotales}
                     />
                     {showTotales && (
-                        <Totales resumenData={totalesData} anio={anio} quincena={quincena} />
+                        <ReusableTableDepositoResumen
+                            endpoint="NominaCtrl/Totales"
+                            anio={anio}
+                            quincena={quincena}
+                            onRowClick={(row) => {
+                                const { ANIO, QUINCENA, NOMINA, BANCO } = row;
+                                router.push(
+                                    `/CrearNomina/ProcesarDatos/DetalleEmpleados?anio=${ANIO}&quincena=${QUINCENA}&nomina=${NOMINA}&banco=${BANCO}`
+                                );
+                            }}
+                        />
+
                     )}
 
                     {/* Encabezado y tabla de Percepciones */}

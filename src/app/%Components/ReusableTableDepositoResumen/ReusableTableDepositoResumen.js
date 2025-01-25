@@ -19,23 +19,24 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import ExportModal from '../ReusableTableDepositoResumen/components/ExportModal';
 import axios from 'axios';
-import { Toast } from 'primereact/toast';
-import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css"
+import { useRouter } from 'next/navigation';
+import styles from './ReusableTableDepositoResumen.module.css';
 import API_BASE_URL from '../../%Config/apiConfig';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import autoTable from 'jspdf-autotable';
-import { jsPDF } from 'jspdf';
+import { Toast } from 'primereact/toast';
 
 const columns = [
-    { label: 'Sector Presupuestal', accessor: 'sectpres' },
-    { label: 'Nómina', accessor: 'nomina' },
-    { label: 'ID Concepto', accessor: 'id_concepto' },
-    { label: 'Nombre Concepto', accessor: 'nombre_concepto' },
-    { label: 'Percepciones', accessor: 'percepciones' },
+    { label: 'AÑO', accessor: 'ANIO' },
+    { label: 'QUINCENA', accessor: 'QUINCENA' },
+    { label: 'NÓMINA', accessor: 'nomina' },
+    { label: 'BANCO', accessor: 'banco' },
+    { label: 'BRUTO', accessor: 'PERCEPCIONES' },
+    { label: 'DEDUCCIONES', accessor: 'DEDUCCIONES' },
+    { label: 'NETO', accessor: 'LIQUIDO' },
+    { label: 'EMPLEADOS', accessor: 'empleados' },
 ];
 
-export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTipo }) {
+export default function ReusableTableDepositoResumen({ endpoint, anio, quincena, onRowClick }) {
+    const router = useRouter();
     const [data, setData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -47,46 +48,49 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
     const toastRef = useRef(null);
 
     useEffect(() => {
-        if (anio && quincena && nombreNomina) {
-            fetchData();
-        }
-    }, [anio, quincena, nombreNomina, subTipo]);
-
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const response = await axios.get(`${API_BASE_URL}/NominaCtrl/PercepcionesSeparadas`, {
-                params: {
-                    anio,
-                    quincena,
-                    nombre: nombreNomina,
-                    cancelado: false,
-                    completado: true,
-                },
-            });
-
-            const filtered = subTipo
-                ? response.data.filter((item) => item.subTipo === subTipo)
-                : response.data;
-
-            const cleanData = filtered.map((row) => ({
-                ...row,
-                percepciones: parseFloat(row.percepciones.replace(/,/g, '')),
-            }));
-
-            setData(cleanData);
-            setFilteredData(cleanData);
-        } catch (error) {
-            toastRef.current.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Hubo un problema al obtener los datos.',
-                life: 3000,
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const url = `${API_BASE_URL}/${endpoint}`;
+                const response = await axios.get(url, {
+                    params: {
+                        anio, // Usamos el año seleccionado
+                        quincena, // Usamos la quincena seleccionada
+                        cancelado: false,
+                        completado: true,
+                    },
+                });
+    
+                const cleanData = response.data.map((row) => ({
+                    ...row,
+                    ANIO: row.ANIO.trim(),
+                    QUINCENA: row.QUINCENA.trim(),
+                    nomina: row.nomina.trim(),
+                    banco: row.banco.trim(),
+                    PERCEPCIONES: parseFloat(row.PERCEPCIONES.replace(/,/g, '')),
+                    DEDUCCIONES: parseFloat(row.DEDUCCIONES.replace(/,/g, '')),
+                    LIQUIDO: parseFloat(row.LIQUIDO.replace(/,/g, '')),
+                    empleados: parseInt(row.empleados.trim(), 10),
+                }));
+    
+                setData(cleanData);
+                setFilteredData(cleanData);
+            } catch (error) {
+                console.error('Error al cargar los datos:', error);
+                toastRef.current.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Hubo un problema al obtener los datos.',
+                    life: 3000,
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+    
+        fetchData();
+    }, [endpoint, anio, quincena]); // <-- Agrega anio y quincena como dependencias
+    
 
     useEffect(() => {
         const filtered = data.filter((row) =>
@@ -127,42 +131,17 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
         setIsExportModalOpen(true);
     };
 
-    const handleExportExcel = () => {
-        const worksheetData = selectedRows.map((row) => ({
-            'Sector Presupuestal': row.sectpres,
-            Nómina: row.nomina,
-            'ID Concepto': row.id_concepto,
-            'Nombre Concepto': row.nombre_concepto,
-            Percepciones: row.percepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Percepciones_${anio}_${quincena}.xlsx`);
-    };
-
-    const handleExportPDF = () => {
-        const doc = new jsPDF();
-        const tableData = selectedRows.map((row) => [
-            row.sectpres,
-            row.nomina,
-            row.id_concepto,
-            row.nombre_concepto,
-            row.percepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-        ]);
-
-        autoTable(doc, {
-            head: [['Sector Presupuestal', 'Nómina', 'ID Concepto', 'Nombre Concepto', 'Percepciones']],
-            body: tableData,
-        });
-
-        doc.save(`Percepciones_${anio}_${quincena}.pdf`);
+    const handleEmpleadosClick = (row) => {
+        const { ANIO, QUINCENA, nomina, banco } = row;
+        router.push(
+            `/CrearNomina/ProcesarDatos/DetalleEmpleados?anio=${ANIO}&quincena=${QUINCENA}&nomina=${nomina}&banco=${banco}`
+        );
     };
 
     return (
         <Paper className={styles.container}>
             <Toast ref={toastRef} />
+            {/* Barra de búsqueda */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1rem' }}>
                 <TextField
                     fullWidth
@@ -188,22 +167,29 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                     color="primary"
                     onClick={handleExportModalOpen}
                     disabled={selectedRows.length === 0}
+                    sx={{
+                        backgroundColor: '#9b1d1d',
+                        '&:hover': { backgroundColor: '#7b1616' },
+                    }}
                 >
                     Exportar
                 </Button>
             </Box>
 
+            {/* Tabla */}
             <TableContainer>
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell padding="checkbox">
+                            <TableCell padding="checkbox" className={styles.headerCheckbox}>
                                 <Checkbox
                                     indeterminate={
                                         selectedRows.length > 0 &&
-                                        filteredData
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .some((row) => !selectedRows.includes(row))
+                                        selectedRows.some((row) =>
+                                            filteredData
+                                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                                .includes(row)
+                                        )
                                     }
                                     checked={
                                         filteredData
@@ -214,10 +200,13 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                                 />
                             </TableCell>
                             {columns.map((col) => (
-                                <TableCell key={col.accessor}>{col.label}</TableCell>
+                                <TableCell key={col.accessor} className={styles.tableHeader}>
+                                    {col.label}
+                                </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
@@ -235,7 +224,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                             filteredData
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => (
-                                    <TableRow key={row.id_concepto}>
+                                    <TableRow key={row.ANIO + row.nomina}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
                                                 checked={selectedRows.includes(row)}
@@ -244,12 +233,27 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                                         </TableCell>
                                         {columns.map((col) => (
                                             <TableCell key={col.accessor}>
-                                                {col.accessor === 'percepciones'
-                                                    ? row[col.accessor].toLocaleString('en-US', {
-                                                          style: 'currency',
-                                                          currency: 'USD',
-                                                      })
-                                                    : row[col.accessor] || '-'}
+                                                {col.accessor === 'empleados' ? (
+                                                    <span
+                                                        style={{
+                                                            color: 'blue',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                        onClick={() => handleEmpleadosClick(row)}
+                                                    >
+                                                        {row[col.accessor]}
+                                                    </span>
+                                                ) : col.accessor === 'PERCEPCIONES' ||
+                                                    col.accessor === 'DEDUCCIONES' ||
+                                                    col.accessor === 'LIQUIDO' ? (
+                                                    row[col.accessor].toLocaleString('en-US', {
+                                                        style: 'currency',
+                                                        currency: 'USD',
+                                                    })
+                                                ) : (
+                                                    row[col.accessor] || '-'
+                                                )}
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -259,15 +263,19 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 </Table>
             </TableContainer>
 
+            {/* Paginación */}
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 count={filteredData.length}
                 rowsPerPage={rowsPerPage}
                 page={page}
                 onPageChange={(e, newPage) => setPage(newPage)}
-                onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
+                onRowsPerPageChange={(e) =>
+                    setRowsPerPage(parseInt(e.target.value, 10))
+                }
             />
 
+            {/* Modal de exportación */}
             <ExportModal
                 open={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
