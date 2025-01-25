@@ -80,10 +80,6 @@ function CargarEstadosCuenta() {
                 />
                 {isDispersionesOpen && (
                     <>
-                        <Box className={styles.progressContainer}>
-                            <Typography>Progreso de datos</Typography>
-                            <ProgressBar value={progressRetenciones} className={styles.progressBar} />
-                        </Box>
                         <TablaRetenciones
                             anio={anio}
                             mes={mes}

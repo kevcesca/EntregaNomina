@@ -1,0 +1,21 @@
+.container {
+    padding: 2rem;
+    background-color: #f8f9fa; /* Fondo claro */
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+.title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #343a40; /* Color oscuro */
+    margin-bottom: 1.5rem;
+}
+
+.tableContainer {
+    margin-top: 2rem;
+}
+
+.dateFilterContainer {
+    margin-bottom: 2rem;
+}
