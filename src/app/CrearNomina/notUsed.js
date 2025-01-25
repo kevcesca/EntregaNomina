@@ -14,7 +14,7 @@ import { ThemeProvider, Box, Typography, Button, Select, MenuItem, Switch, FormC
 import theme from '../$tema/theme';
 import Link from 'next/link';
 import withAdminRole from '../%Components/hoc/withAdminRole';  // Importa el HOC
-import API_BASE_URL from '../%Config/apiConfig'
+import API_BASE_URL from '../%Config/apiConfig';
 
 function CargarDatos() {
     const { data: session } = useSession();

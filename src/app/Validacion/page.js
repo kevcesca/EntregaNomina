@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button, Box, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import DateFilter from '../%Components/DateFilter/DateFilter'; // Importar el DateFilter
 import TablaConsultaDetallesBitacora from '../%Components/TablasCambios/TablaConsultaDetallesBitacora';
+import ReusableTableDetallesBitacora from '../%Components/ReusableTableDetallesBitacora/ReusableTableDetallesBitacora'; // Importa aquí el componente
 import HeaderSeccion from '../%Components/HeaderSeccion/HeaderSeccion'; // Importar HeaderSeccion
 import styles from './page.module.css';
 import { ThemeProvider } from '@mui/material';
@@ -79,13 +80,14 @@ export default function Validacion() {
                             />
                             {showTabla && (
                                 <div className={styles.tableContainer}>
-                                    <TablaConsultaDetallesBitacora
+                                    <ReusableTableDetallesBitacora
                                         tipoNomina={tipoNomina}
                                         anio={anio}
                                         quincena={quincena}
                                     />
                                 </div>
                             )}
+
                         </>
                     )}
                     {/* Botones de navegación */}
@@ -102,21 +104,21 @@ export default function Validacion() {
                         </Link>
 
                         <Link href="/CrearNomina">
-                        <AsyncButton
-                            variant="contained"
-                            color="secondary"
-                            onClick={async () => {
-                                try {
-                                    await new Promise((resolve) => setTimeout(resolve, 1000));
-                                    router.push('/CrearNomina'); // Navega al enlace especificado
-                                } catch (error) {
-                                    console.error('Error al regresar:', error);
-                                }
-                            }}
-                            className={styles.backButton}
-                        >
-                            Regresar
-                        </AsyncButton>
+                            <AsyncButton
+                                variant="contained"
+                                color="secondary"
+                                onClick={async () => {
+                                    try {
+                                        await new Promise((resolve) => setTimeout(resolve, 1000));
+                                        router.push('/CrearNomina'); // Navega al enlace especificado
+                                    } catch (error) {
+                                        console.error('Error al regresar:', error);
+                                    }
+                                }}
+                                className={styles.backButton}
+                            >
+                                Regresar
+                            </AsyncButton>
                         </Link>
                     </div>
                 </main>
