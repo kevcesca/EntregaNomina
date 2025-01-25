@@ -170,7 +170,6 @@ export default function AppBar() {
                     {currentUser && (
                         <UserButton
                             onClick={handleMenuClick}
-                            endIcon={<KeyboardArrowDownIcon />}
                             sx={{ width: '20vw', padding: "1rem" }}
                         >
                             {currentUser.nombre_usuario}
