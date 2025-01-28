@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import { Toast } from 'primereact/toast';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -98,7 +99,7 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
             onClose(); // Cierra el modal
         } catch (error) {
             console.error('Error al crear el rol:', error);
-            alert ("Nombre de rol ya registrado")
+            alert("Nombre de rol ya registrado")
         }
 
     };
@@ -180,17 +181,26 @@ const CreateRoleModal = ({ isOpen, onClose, onRoleCreated }) => {
                 </Grid>
             </DialogContent>
             <DialogActions>
-               
-                <Button 
-                onClick={onClose} 
-                color="secondary"
+
+                <Button
+                    onClick={onClose}
+                    color="secondary"
                 >
                     Cancelar
                 </Button>
-               
-                <Button onClick={handleSave} color="primary">
+
+                <Button
+                    onClick={handleSave}
+                    color="primary"
+                    disabled={
+                        roleData.name.trim() === '' || // Verifica que el nombre no esté vacío
+                        roleData.description.trim() === '' || // Verifica que la descripción no esté vacía
+                        selectedPermissions.length === 0 // Verifica que haya al menos un permiso seleccionado
+                    }
+                >
                     Crear Rol
                 </Button>
+
             </DialogActions>
         </Dialog>
     );

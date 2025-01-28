@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { TextField, Button, Pagination } from '@mui/material';
+import { TextField, Button, TablePagination } from '@mui/material';
 import styles from './page.module.css';
 import AddUserModal from './components/AddUserModal';
 import UserTableRow from './components/UserTableRow';
@@ -33,12 +33,28 @@ const UserTable = () => {
     const [isExportModalOpen, setIsExportModalOpen] = useState(false); // Estado para el modal de exportación
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // Estado para abrir/cerrar el modal
     const [isEnabling, setIsEnabling] = useState(true); // Indica si estamos habilitando o deshabilitando usuarios
+    const [page, setPage] = useState(0); // Página actual
+    const [rowsPerPage, setRowsPerPage] = useState(10); // Número de filas por página
+
 
     const openMenu = Boolean(anchorEl);
 
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+    const displayedUsers = filteredUsers.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+    );
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reiniciar a la primera página
+    };
+
 
     const handlePageChange = (event, value) => {
         setCurrentPage(value);
@@ -46,17 +62,19 @@ const UserTable = () => {
 
     const handleSearchChange = (event) => {
         const query = event.target.value.toLowerCase();
-        setSearchQuery(query); // Actualizar el término de búsqueda
+        setSearchQuery(query);
+    
+        // Filtrar usuarios basándonos en cualquier propiedad
         setFilteredUsers(
-            users.filter(
-                (user) =>
-                    user['Nombre Empleado'].toLowerCase().includes(query) ||
-                    user['Nombre de Usuario'].toLowerCase().includes(query) ||
-                    user.Email.toLowerCase().includes(query)
+            users.filter((user) =>
+                Object.values(user).some((value) =>
+                    String(value).toLowerCase().includes(query)
+                )
             )
         );
-        setCurrentPage(1); // Reiniciar a la primera página
-    };
+    
+        setPage(0); // Reiniciar a la primera página
+    };    
 
     // Función para abrir el modal de cambio de contraseña
     const handleChangePassword = () => {
@@ -267,6 +285,7 @@ const UserTable = () => {
                         color="primary"
                         onClick={handleExportOpen}
                         style={{ marginBottom: '10px', marginLeft: '10px' }}
+                        disabled={!selectedUsers || !selectedUsers.length}
                     >
                         Exportar Datos
                     </Button>
@@ -327,9 +346,8 @@ const UserTable = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {currentItems.map((user) => (
+                    {displayedUsers.map((user) => (
                         <UserTableRow
-                            className={styles.rowWidth}
                             key={user['ID Empleado']}
                             user={user}
                             isEditing={editingUser === user['ID Empleado']}
@@ -341,21 +359,12 @@ const UserTable = () => {
                                 setAnchorEl(e.currentTarget);
                                 setSelectedUser(user);
                             }}
-                            onRolesUpdated={(userId, newRoles) => {
-                                setUsers((prevUsers) =>
-                                    prevUsers.map((u) =>
-                                        u['ID Empleado'] === userId
-                                            ? { ...u, Rol: newRoles.join(', ') }
-                                            : u
-                                    )
-                                );
-                                fetchUsers();
-                            }}
                             isSelected={selectedUsers.includes(user['ID Empleado'])}
                             onToggleSelect={() => handleSelectUser(user['ID Empleado'])}
                         />
                     ))}
                 </tbody>
+
             </table>
 
             <UserActionsMenu
@@ -426,12 +435,18 @@ const UserTable = () => {
                 columns={columns}
             />
 
-            <Pagination
-                count={Math.ceil(filteredUsers.length / itemsPerPage)} // Número total de páginas
-                page={currentPage} // Página actual
-                onChange={handlePageChange} // Manejador del cambio de página
-                color="primary"
-                className={styles.pagination}
+            <TablePagination
+                component="div"
+                count={filteredUsers.length} // Total de usuarios filtrados
+                page={page} // Página actual
+                onPageChange={handleChangePage} // Manejador del cambio de página
+                rowsPerPage={rowsPerPage} // Filas por página
+                onRowsPerPageChange={handleChangeRowsPerPage} // Manejador de cambio de filas por página
+                rowsPerPageOptions={[5, 10, 25]} // Opciones disponibles para filas por página
+                labelRowsPerPage="Usuarios por página"
+                labelDisplayedRows={({ from, to, count }) =>
+                    `${from}-${to} de ${count !== -1 ? count : `más de ${to}`}`
+                }
             />
 
         </div>
