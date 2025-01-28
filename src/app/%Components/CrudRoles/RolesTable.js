@@ -24,11 +24,16 @@ const RolesTable = ({
     };
 
     // Filtrar roles según el término de búsqueda
-    const filteredRoles = roles.filter(
-        (role) =>
-            role.name.toLowerCase().includes(searchTerm) ||
-            role.description.toLowerCase().includes(searchTerm) ||
-            role.permissions.some((perm) => perm.toLowerCase().includes(searchTerm))
+    const filteredRoles = roles.filter((role) =>
+        Object.values(role).some((value) => {
+            // Verifica si el valor actual es un array (como "permissions") o un string
+            if (Array.isArray(value)) {
+                return value.some((item) =>
+                    item.toString().toLowerCase().includes(searchTerm)
+                );
+            }
+            return value.toString().toLowerCase().includes(searchTerm);
+        })
     );
 
     // Manejar cambio de página
@@ -115,7 +120,7 @@ const RolesTable = ({
                             size="small"
                             value={editValues.name}
                             onChange={(e) =>
-                        setEditValues((prev) => ({ ...prev, name: e.target.value }))
+                                setEditValues((prev) => ({ ...prev, name: e.target.value }))
                             }
                             autoFocus
                         />
