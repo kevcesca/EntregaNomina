@@ -5,7 +5,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import styles from './CrudRoles.module.css';
 
-const RoleRow = ({
+const RoleRow = React.memo(({
     role,
     isSelected,
     onToggleRole,
@@ -17,21 +17,26 @@ const RoleRow = ({
     updateRole,
     onOpenModal,
 }) => {
-    // Inicia la edición del rol
-    const startEditing = () => {
+    const [editingField, setEditingField] = React.useState(null); // Campo específico en edición (name o description)
+
+    // Inicia la edición del rol en el campo correspondiente
+    const startEditing = (field) => {
         setEditingRoleId(role.id);
-        setEditValues({ name: role.name, description: role.description });
+        setEditingField(field);
+        setEditValues({
+            name: role.name,
+            description: role.description,
+        });
     };
 
     // Cancela la edición
     const cancelEditing = () => {
         setEditingRoleId(null);
-        setEditValues({ name: '', description: '' });
+        setEditingField(null);
     };
 
     // Guarda los cambios realizados al rol
     const saveEditing = () => {
-        // Actualiza el estado local
         setRoles((prevRoles) =>
             prevRoles.map((r) =>
                 r.id === role.id
@@ -39,12 +44,12 @@ const RoleRow = ({
                     : r
             )
         );
-        // Llama a la función para actualizar en el backend
         updateRole(role.id, {
             nombre_rol: editValues.name,
             descripcion_rol: editValues.description,
         });
-        setEditingRoleId(null); // Finaliza la edición
+        setEditingRoleId(null);
+        setEditingField(null);
     };
 
     return (
@@ -61,12 +66,12 @@ const RoleRow = ({
             <td>{role.id}</td>
 
             {/* Campo de nombre del rol */}
-            <td onDoubleClick={startEditing}>
-                {editingRoleId === role.id ? (
+            <td onDoubleClick={() => startEditing("name")}>
+                {editingRoleId === role.id && editingField === "name" ? (
                     <TextField
                         variant="outlined"
                         size="small"
-                        value={editValues.name}
+                        value={editValues.name || ""}
                         onChange={(e) =>
                             setEditValues((prev) => ({ ...prev, name: e.target.value }))
                         }
@@ -77,19 +82,16 @@ const RoleRow = ({
                 )}
             </td>
 
-            {/* Campo de descripción del rol */}
-            <td onDoubleClick={startEditing}>
-                {editingRoleId === role.id ? (
+            <td onDoubleClick={() => startEditing("description")}>
+                {editingRoleId === role.id && editingField === "description" ? (
                     <TextField
                         variant="outlined"
                         size="small"
-                        value={editValues.description}
+                        value={editValues.description || ""}
                         onChange={(e) =>
-                            setEditValues((prev) => ({
-                                ...prev,
-                                description: e.target.value,
-                            }))
+                            setEditValues((prev) => ({ ...prev, description: e.target.value }))
                         }
+                        autoFocus
                     />
                 ) : (
                     role.description
@@ -121,7 +123,6 @@ const RoleRow = ({
                                 color="primary"
                                 size="small"
                                 onClick={saveEditing}
-                                startIcon={<SaveIcon />}
                                 className={styles.buttonSave}
                             >
                                 Guardar
@@ -133,7 +134,6 @@ const RoleRow = ({
                                 color="secondary"
                                 size="small"
                                 onClick={cancelEditing}
-                                startIcon={<CancelIcon />}
                                 className={styles.buttonCancel}
                             >
                                 Cancelar
@@ -144,6 +144,6 @@ const RoleRow = ({
             )}
         </tr>
     );
-};
+});
 
 export default RoleRow;

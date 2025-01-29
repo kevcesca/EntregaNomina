@@ -20,7 +20,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ExportModal from '../ReusableTableDepositoResumen/components/ExportModal';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
-import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css"
+import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css";
 import API_BASE_URL from '../../%Config/apiConfig';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -71,7 +71,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
 
             const cleanData = filtered.map((row) => ({
                 ...row,
-                percepciones: parseFloat(row.percepciones.replace(/,/g, '')),
+                percepciones: parseFloat(row.percepciones?.replace(/,/g, '') || 0), // Inicializa en 0 si está vacío
             }));
 
             setData(cleanData);
@@ -160,6 +160,8 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
         doc.save(`Percepciones_${anio}_${quincena}.pdf`);
     };
 
+    const totalPercepciones = data.reduce((sum, row) => sum + (row.percepciones || 0), 0);
+
     return (
         <Paper className={styles.container}>
             <Toast ref={toastRef} />
@@ -245,7 +247,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                                         {columns.map((col) => (
                                             <TableCell key={col.accessor}>
                                                 {col.accessor === 'percepciones'
-                                                    ? row[col.accessor].toLocaleString('en-US', {
+                                                    ? (row[col.accessor] || 0).toLocaleString('en-US', {
                                                           style: 'currency',
                                                           currency: 'USD',
                                                       })
@@ -267,6 +269,10 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 onPageChange={(e, newPage) => setPage(newPage)}
                 onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
             />
+
+            <div style={{ padding: '1rem', textAlign: 'right' }}>
+                <strong>Total Percepciones:</strong> {totalPercepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+            </div>
 
             <ExportModal
                 open={isExportModalOpen}

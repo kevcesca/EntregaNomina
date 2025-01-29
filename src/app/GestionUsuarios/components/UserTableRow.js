@@ -4,6 +4,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AssignRolesModal from './AssignRolesModal';
 import styles from '../page.module.css';
+import AsyncButton from '../../%Components/AsyncButton/AsyncButton';
 
 const UserTableRow = ({
     user,
@@ -16,6 +17,7 @@ const UserTableRow = ({
     onRolesUpdated,
     isSelected,
     onToggleSelect,
+    onCancelEdit
 }) => {
     const [isRolesModalOpen, setIsRolesModalOpen] = useState(false);
     const [emailError, setEmailError] = useState(''); // Estado para errores en el correo
@@ -60,6 +62,12 @@ const UserTableRow = ({
         }
         onConfirmEdit(); // Confirmar cambios
     };
+
+    const handleCancelEdit = () => {
+        onCancelEdit(); // Notifica al padre para salir del modo edición
+        setEmailError(''); // Limpia errores de email
+        setUsernameError(''); // Limpia errores de usuario
+    };    
 
     const handleOpenRolesModal = () => {
         setIsRolesModalOpen(true);
@@ -147,20 +155,33 @@ const UserTableRow = ({
                 {/* Opciones */}
                 <td>
                     {isEditing ? (
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={handleConfirmEdit}
-                            className={styles.confirmButton}
-                        >
-                            Confirmar
-                        </Button>
+                        <div className={styles.buttons}>
+                            <AsyncButton
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={handleConfirmEdit}
+                                className={styles.confirmButton}
+                            >
+                                Confirmar
+                            </AsyncButton>
+
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="small"
+                                onClick={handleCancelEdit}
+                                className={styles.cancelButton}
+                                style={{ marginLeft: '8px' }}
+                            >
+                                Cancelar
+                            </Button>
+                        </div>
                     ) : (
                         <IconButton
                             onClick={(e) => onMenuOpen(e, user)}
                             aria-label="opciones"
-                            style={{ color: !user.Activo ? 'black' : 'inherit' }} // Cambiar el color si está deshabilitado
+                            style={{ color: !user.Activo ? 'black' : 'inherit' }}
                         >
                             <MoreVertIcon />
                         </IconButton>
