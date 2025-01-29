@@ -17,7 +17,7 @@ const AsyncButton = ({ onClick, children, ...props }) => {
       console.error("Error during async operation:", error);
     } finally {
       // Después de 2 segundos, habilitar nuevamente el botón
-      setTimeout(() => setIsLoading(false), 2000); 
+      setTimeout(() => setIsLoading(false), 3000); 
     }
   };
 

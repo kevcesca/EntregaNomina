@@ -53,9 +53,11 @@
 
 .dialog {
     border: solid #9b1d1d 4px !important;
+    overflow-y: hidden !important;
+    height: 100vh !important;
 }
 
-.tableContainer{
+.tableContainer {
     width: 98%;
 }
 
@@ -64,27 +66,26 @@
     flex-wrap: wrap;
     gap: 2rem;
     justify-content: space-between;
-  }
-  
-  .previewContainer {
+}
+
+.previewContainer {
     flex: 2;
     max-height: 70vh;
     overflow-y: auto;
-  }
-  
-  .dialogTitle {
+}
+
+.dialogTitle {
     font-size: 1.8rem;
     font-weight: bold;
     text-align: center;
-  }
-  
-  .exportButton {
+}
+
+.exportButton {
     background-color: #9b1d1d;
     color: white;
     text-transform: uppercase;
-  }
-  
-  .exportButton:hover {
+}
+
+.exportButton:hover {
     background-color: #7b1616;
-  }
-  
+}

@@ -140,3 +140,7 @@ form .MuiButton-root {
     display: flex;
     justify-content: space-between;
 }
+
+.front{
+    z-index: 1000 !important;
+}

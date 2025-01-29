@@ -63,7 +63,7 @@ const UserTable = () => {
     const handleSearchChange = (event) => {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
-    
+
         // Filtrar usuarios basándonos en cualquier propiedad
         setFilteredUsers(
             users.filter((user) =>
@@ -72,9 +72,9 @@ const UserTable = () => {
                 )
             )
         );
-    
+
         setPage(0); // Reiniciar a la primera página
-    };    
+    };
 
     // Función para abrir el modal de cambio de contraseña
     const handleChangePassword = () => {
@@ -209,6 +209,11 @@ const UserTable = () => {
             'Nombre de Usuario': user['Nombre de Usuario'],
             Email: user.Email,
         }));
+    };
+
+    const handleCancelEdit = () => {
+        setEditingUser(null); // Sale del modo edición
+        setEditedFields({}); // Limpia los campos editados
     };
 
     // Manejar cambios en los campos editables
@@ -355,6 +360,7 @@ const UserTable = () => {
                             onDoubleClick={handleDoubleClick}
                             onInputChange={handleInputChange}
                             onConfirmEdit={handleConfirmEdit}
+                            onCancelEdit={handleCancelEdit} // Pasa la función
                             onMenuOpen={(e, user) => {
                                 setAnchorEl(e.currentTarget);
                                 setSelectedUser(user);
