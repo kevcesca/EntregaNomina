@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { TableRow, TableCell, Checkbox, TextField, IconButton, Button } from "@mui/material";
+import { TableRow, TableCell, Checkbox, TextField, IconButton } from "@mui/material";
 import { Save, Close } from "@mui/icons-material";
 
 const TableRowComponent = ({
@@ -54,12 +54,10 @@ const TableRowComponent = ({
         <TableRow onDoubleClick={handleDoubleClick} style={{ cursor: editable ? "pointer" : "default" }}>
             <TableCell padding="checkbox">
                 {!isNewRow && (
-                 <Checkbox
-                 checked={selectedRows.includes(row.id || row.id_concepto)} // Verifica el ID
-                 onChange={() => handleSelectRow(row)}
-             />
-             
-            
+                    <Checkbox
+                        checked={selectedRows.some(selected => selected.id === row.id)}
+                        onChange={() => handleSelectRow(row)}
+                    />
 
                 )}
             </TableCell>
@@ -88,12 +86,12 @@ const TableRowComponent = ({
             ))}
             {(isEditing || isNewRow) && (
                 <TableCell>
-                    <Button color="primary" variant="contained" style={{}} onClick={handleSaveClick}>
-                        Aceptar
-                    </Button>
-                    <Button color="primary" variant="contained" style={{ margin: "10px" }} onClick={handleCancelClick}>
-                        Cancelar
-                    </Button>
+                    <IconButton color="success" onClick={handleSaveClick}>
+                        <Save />
+                    </IconButton>
+                    <IconButton color="error" onClick={handleCancelClick}>
+                        <Close />
+                    </IconButton>
                 </TableCell>
             )}
         </TableRow>
