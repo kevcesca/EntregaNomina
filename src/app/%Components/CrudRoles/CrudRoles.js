@@ -7,7 +7,6 @@ import RolesTable from './RolesTable';
 import AssignPermissionsModal from './PermissionsModal';
 import { Toast } from 'primereact/toast';
 
-
 const CrudRoles = () => {
     const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -17,7 +16,6 @@ const CrudRoles = () => {
     const [modalRole, setModalRole] = useState(null);
     const [selectedRoles, setSelectedRoles] = useState([]); // IDs de roles seleccionados
     const toast = useRef(null);
-
 
     // Fetch roles desde el backend
     const fetchRoles = async () => {
@@ -136,7 +134,6 @@ const CrudRoles = () => {
 
                 toast.current.show({ severity: 'error', summary: 'Error', detail: `No se pudieron eliminar los roles. Razón: ${error.message}`, life: 3000 });
 
-
             }
         }
     };
@@ -156,8 +153,6 @@ const CrudRoles = () => {
         );
 
         toast.current.show({ severity: 'success', summary: 'Success', detail: `Permisos actualizados correctamente.`, life: 3000 });
-
-
     };
 
     return (

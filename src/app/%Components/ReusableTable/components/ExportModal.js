@@ -96,12 +96,13 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
     <ThemeProvider theme={theme}>
       <Dialog
         open={open}
+        className={styles.dialog}	
         onClose={onClose}
         fullWidth
         maxWidth="lg"
         sx={{
           "& .MuiDialog-paper": {
-            height: "85vh",
+            height: "95vh",
             maxWidth: "95%",
             padding: "16px",
           },
