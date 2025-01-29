@@ -15,7 +15,7 @@ export default function CLCDataTable({ data, dateData, refreshTable }) {
 
       // Descargar el archivo
       const response = await fetch(
-        `http://192.168.100.25:7080/Nomina/download/CLCs?mes=${mes}&anio=${anio}&tipo=CLC&nombre=${encodeURIComponent(
+        `${API_BASE_URL}/download/CLCs?mes=${mes}&anio=${anio}&tipo=CLC&nombre=${encodeURIComponent(
           nombreArchivoLimpio
         )}`,
         {

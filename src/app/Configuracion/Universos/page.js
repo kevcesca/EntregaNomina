@@ -7,9 +7,10 @@ import API_BASE_URL from "../../%Config/apiConfig";
 
 const UniversosPage = () => {
   const columns = [
-    { label: "ID Universo", accessor: "id_universo" },
-    { label: "Nombre Nómina", accessor: "nombre_nomina" },
-  ];
+    { label: "ID Universo", accessor: "id_universo", width: "30%" },
+    { label: "Nombre Nómina", accessor: "nombre_nomina", width: "70%" },
+];
+
   
   const fetchUniversos = async () => {
     const response = await fetch(`${API_BASE_URL}/cat/universos`);
