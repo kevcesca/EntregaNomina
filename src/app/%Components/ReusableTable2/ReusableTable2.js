@@ -36,6 +36,9 @@ const ReusableTable2 = ({
     const [searchQuery, setSearchQuery] = useState('');
     const [isExportModalOpen, setExportModalOpen] = useState(false); // Control del modal de exportación
     const nominaOptions = ['BASE', 'ESTRUCTURA', 'NOMINA 8', 'HONORARIOS'];
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [universoAEliminar, setUniversoAEliminar] = useState(null); // Guarda el universo a eliminar
+
 
     useEffect(() => {
         fetchData().then(setData).catch(console.error);
@@ -54,7 +57,7 @@ const ReusableTable2 = ({
             const updatedData = await fetchData();
             setData(updatedData);
             setCreatingRow(false);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Universo creado correctamente' });
+           // toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Universo creado correctamente' });
         } catch (error) {
             console.error(error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo crear' });
@@ -80,12 +83,13 @@ const ReusableTable2 = ({
             const updatedData = await fetchData();
             setData(updatedData);
             setSelectedRows([]);
-            toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Eliminado correctamente' });
+            // toast.current.show({ severity: 'success', summary: 'Éxito', detail: 'Eliminado correctamente' });
         } catch (error) {
             console.error(error);
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar' });
         }
     };
+    
 
     const handleSelectRow = (row) => {
         const id = row.id_universo || row.id;
@@ -137,45 +141,48 @@ const ReusableTable2 = ({
             />
             <TableContainer>
                 <Table>
-                    <TableHeaderRow
-                        columns={columns}
-                        deletable={deletable}
-                        data={data}
-                        filteredData={filteredData} // Pasar los datos filtrados
-                        selectedRows={selectedRows}
-                        setSelectedRows={setSelectedRows}
-                        handleSelectAll={handleSelectAll}
-                    />
-                    <TableBody>
-                        {creatingRow && (
-                            <TableRowComponent
-                                row={newRowData}
-                                columns={columns}
-                                editable
-                                isNewRow
-                                nominaOptions={nominaOptions}
-                                onSave={handleSaveNewRow}
-                                onCancel={() => setCreatingRow(false)}
-                                selectedRows={selectedRows}
-                                handleSelectRow={handleSelectRow}
-                            />
-                        )}
-                        {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                            <TableRowComponent
-                                key={row.id_universo || row.id}
-                                row={row}
-                                columns={columns}
-                                editable={editable}
-                                nominaOptions={nominaOptions}
-                                onSave={handleSaveEdit}
-                                onCancel={() => setEditingRow(null)}
-                                selectedRows={selectedRows}
-                                handleSelectRow={handleSelectRow}
-                                onDoubleClick={() => setEditingRow(row)} // Permitir edición al hacer doble clic
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
+  <thead>
+    <TableHeaderRow
+      columns={columns}
+      deletable={deletable}
+      data={data}
+      filteredData={filteredData}
+      selectedRows={selectedRows}
+      setSelectedRows={setSelectedRows}
+      handleSelectAll={handleSelectAll}
+    />
+  </thead>
+  <tbody>
+    {creatingRow && (
+      <TableRowComponent
+        row={newRowData}
+        columns={columns}
+        editable
+        isNewRow
+        nominaOptions={nominaOptions}
+        onSave={handleSaveNewRow}
+        onCancel={() => setCreatingRow(false)}
+        selectedRows={selectedRows}
+        handleSelectRow={handleSelectRow}
+      />
+    )}
+    {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+      <TableRowComponent
+        key={row.id_universo || row.id}
+        row={row}
+        columns={columns}
+        editable={editable}
+        nominaOptions={nominaOptions}
+        onSave={handleSaveEdit}
+        onCancel={() => setEditingRow(null)}
+        selectedRows={selectedRows}
+        handleSelectRow={handleSelectRow}
+        onDoubleClick={() => setEditingRow(row)}
+      />
+    ))}
+  </tbody>
+</Table>
+
             </TableContainer>
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
