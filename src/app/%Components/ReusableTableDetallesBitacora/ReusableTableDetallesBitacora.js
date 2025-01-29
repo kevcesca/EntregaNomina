@@ -45,7 +45,7 @@ export default function ReusableTableDetallesBitacora({ anio, quincena, tipoNomi
     const [isLoading, setIsLoading] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
-    // Cargar datos desde el API
+    // 🚀 Cargar datos desde el API cuando cambian los filtros
     useEffect(() => {
         const fetchData = async () => {
             if (!anio || !quincena || !tipoNomina) return;
@@ -59,6 +59,7 @@ export default function ReusableTableDetallesBitacora({ anio, quincena, tipoNomi
                 const result = await response.json();
                 setData(result);
                 setFilteredData(result);
+                setSelectedRows([]); // 🔴 Limpiar selección al cambiar filtros
             } catch (error) {
                 console.error('Error al cargar los datos:', error);
                 toastRef.current.show({
@@ -73,23 +74,24 @@ export default function ReusableTableDetallesBitacora({ anio, quincena, tipoNomi
         };
 
         fetchData();
-    }, [anio, quincena, tipoNomina]);
+    }, [anio, quincena, tipoNomina]); // 🔴 Se ejecuta cuando cambian los filtros
 
-    // Filtrar datos por búsqueda
+    // 🚀 Limpiar selección si se borra el texto de búsqueda
     useEffect(() => {
         const filtered = data.filter((row) =>
             columns.some((col) =>
                 String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
             )
         );
-        setFilteredData(filtered);
-    }, [searchQuery, data]);
 
-    const handleSelectRow = (row) => {
-        setSelectedRows((prev) =>
-            prev.includes(row) ? prev.filter((r) => r !== row) : [...prev, row]
-        );
-    };
+        setFilteredData(filtered);
+
+        // 🔴 Si la barra de búsqueda está vacía, limpiar selección
+        if (searchQuery === '') {
+            setSelectedRows([]);
+        }
+    }, [searchQuery, data]); // 🔴 Se ejecuta cuando cambia `searchQuery`
+
 
     const handleSelectAll = (checked) => {
         const visibleRows = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
@@ -101,6 +103,18 @@ export default function ReusableTableDetallesBitacora({ anio, quincena, tipoNomi
             setSelectedRows(newSelection);
         }
     };
+
+    const handleSelectRow = (row) => {
+        setSelectedRows((prev) => {
+            // Si la fila ya está seleccionada, la quitamos
+            if (prev.includes(row)) {
+                return prev.filter((selectedRow) => selectedRow !== row);
+            }
+            // Si no está seleccionada, la agregamos
+            return [...prev, row];
+        });
+    };
+
 
     const handleExportModalOpen = () => {
         if (selectedRows.length === 0) {
@@ -214,6 +228,7 @@ export default function ReusableTableDetallesBitacora({ anio, quincena, tipoNomi
                                 ))
                         )}
                     </TableBody>
+
                 </Table>
             </TableContainer>
 

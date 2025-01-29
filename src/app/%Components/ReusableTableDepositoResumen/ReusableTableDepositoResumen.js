@@ -49,74 +49,121 @@ export default function ReusableTableDepositoResumen({ endpoint, anio, quincena,
 
     useEffect(() => {
         const fetchData = async () => {
+            if (!endpoint || !anio || !quincena) {
+                console.warn("❌ Faltan parámetros para hacer la consulta.");
+                setIsLoading(false);
+                return;
+            }
+
             setIsLoading(true);
             try {
-                const url = `${API_BASE_URL}/${endpoint}`;
-                const response = await axios.get(url, {
+                console.log(`🔍 Consultando: ${API_BASE_URL}/${endpoint} con Año: ${anio}, Quincena: ${quincena}`);
+
+                const response = await axios.get(`${API_BASE_URL}/${endpoint}`, {
                     params: {
-                        anio, // Usamos el año seleccionado
-                        quincena, // Usamos la quincena seleccionada
+                        anio,
+                        quincena,
                         cancelado: false,
                         completado: true,
                     },
                 });
-    
-                const cleanData = response.data.map((row) => ({
-                    ...row,
-                    ANIO: row.ANIO.trim(),
-                    QUINCENA: row.QUINCENA.trim(),
-                    nomina: row.nomina.trim(),
-                    banco: row.banco.trim(),
-                    PERCEPCIONES: parseFloat(row.PERCEPCIONES.replace(/,/g, '')),
-                    DEDUCCIONES: parseFloat(row.DEDUCCIONES.replace(/,/g, '')),
-                    LIQUIDO: parseFloat(row.LIQUIDO.replace(/,/g, '')),
-                    empleados: parseInt(row.empleados.trim(), 10),
-                }));
-    
-                setData(cleanData);
-                setFilteredData(cleanData);
+
+                if (!response.data || response.data.length === 0) {
+                    console.warn("⚠ No se recibieron datos desde la API.");
+                    setData([]);
+                    setFilteredData([]);
+                } else {
+                    console.log("✅ Datos recibidos:", response.data);
+
+                    // Limpieza y formateo de datos
+                    const cleanData = response.data.map((row) => ({
+                        ...row,
+                        ANIO: row.ANIO?.trim() || "",
+                        QUINCENA: row.QUINCENA?.trim() || "",
+                        nomina: row.nomina?.trim() || "",
+                        banco: row.banco?.trim() || "",
+                        PERCEPCIONES: parseFloat(row.PERCEPCIONES?.replace(/,/g, "") || 0),
+                        DEDUCCIONES: parseFloat(row.DEDUCCIONES?.replace(/,/g, "") || 0),
+                        LIQUIDO: parseFloat(row.LIQUIDO?.replace(/,/g, "") || 0),
+                        empleados: parseInt(row.empleados?.trim() || "0", 10),
+                    }));
+
+                    setData(cleanData);
+                    setFilteredData(cleanData);
+                }
             } catch (error) {
-                console.error('Error al cargar los datos:', error);
-                toastRef.current.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Hubo un problema al obtener los datos.',
+                console.error("❌ Error al obtener los datos:", error);
+                toastRef.current?.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "No se pudieron cargar los datos. Intenta de nuevo.",
                     life: 3000,
                 });
             } finally {
                 setIsLoading(false);
             }
         };
-    
+
         fetchData();
-    }, [endpoint, anio, quincena]); // <-- Agrega anio y quincena como dependencias
-    
+    }, [endpoint, anio, quincena]);
+
+
 
     useEffect(() => {
-        const filtered = data.filter((row) =>
-            columns.some((col) =>
-                String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        );
-        setFilteredData(filtered);
+        if (!searchQuery.trim()) {
+            setFilteredData(data); // Si no hay búsqueda, muestra todos los datos
+            setSelectedRows([]); // 🔴 Se deseleccionan todas las filas cuando se borra la búsqueda
+        } else {
+            setFilteredData(data.filter(row =>
+                columns.some(col =>
+                    String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
+                )
+            ));
+            setSelectedRows([]); // 🔴 Se deseleccionan todas las filas cuando se hace una nueva búsqueda
+        }
     }, [searchQuery, data]);
+    
+    
+
 
     const handleSelectRow = (row) => {
-        setSelectedRows((prev) =>
-            prev.includes(row) ? prev.filter((r) => r !== row) : [...prev, row]
-        );
+        setSelectedRows((prev) => {
+            const rowKey = `${row.ANIO}-${row.nomina}-${row.banco}`; // Clave única para identificar filas
+            const isSelected = prev.some((r) => `${r.ANIO}-${r.nomina}-${r.banco}` === rowKey);
+
+            if (isSelected) {
+                return prev.filter((r) => `${r.ANIO}-${r.nomina}-${r.banco}` !== rowKey);
+            } else {
+                return [...prev, row];
+            }
+        });
     };
+
 
     const handleSelectAll = (checked) => {
         const visibleRows = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
         if (checked) {
-            const newSelection = [...selectedRows, ...visibleRows.filter((row) => !selectedRows.includes(row))];
-            setSelectedRows(newSelection);
+            setSelectedRows((prev) => {
+                const updatedSelection = [...prev];
+
+                visibleRows.forEach((row) => {
+                    const rowKey = `${row.ANIO}-${row.nomina}-${row.banco}`;
+                    if (!prev.some((r) => `${r.ANIO}-${r.nomina}-${r.banco}` === rowKey)) {
+                        updatedSelection.push(row);
+                    }
+                });
+
+                return updatedSelection;
+            });
         } else {
-            const newSelection = selectedRows.filter((row) => !visibleRows.includes(row));
-            setSelectedRows(newSelection);
+            setSelectedRows((prev) =>
+                prev.filter((row) => !visibleRows.some((r) => `${r.ANIO}-${r.nomina}-${r.banco}` === `${row.ANIO}-${row.nomina}-${row.banco}`))
+            );
         }
     };
+
+
 
     const handleExportModalOpen = () => {
         if (selectedRows.length === 0) {
@@ -224,12 +271,13 @@ export default function ReusableTableDepositoResumen({ endpoint, anio, quincena,
                             filteredData
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => (
-                                    <TableRow key={row.ANIO + row.nomina}>
+                                    <TableRow key={`${row.ANIO}-${row.nomina}-${row.banco}-${row.QUINCENA}`}>
                                         <TableCell padding="checkbox">
                                             <Checkbox
-                                                checked={selectedRows.includes(row)}
+                                                checked={selectedRows.some((r) => `${r.ANIO}-${r.nomina}-${r.banco}` === `${row.ANIO}-${row.nomina}-${row.banco}`)}
                                                 onChange={() => handleSelectRow(row)}
                                             />
+
                                         </TableCell>
                                         {columns.map((col) => (
                                             <TableCell key={col.accessor}>
@@ -279,9 +327,10 @@ export default function ReusableTableDepositoResumen({ endpoint, anio, quincena,
             <ExportModal
                 open={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
-                selectedRows={selectedRows}
-                columns={columns}
+                selectedRows={selectedRows}  // ✅ Pasa los datos correctos
+                columns={columns}            // ✅ Pasa las columnas correctas
             />
+
         </Paper>
     );
 }
