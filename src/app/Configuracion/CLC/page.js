@@ -71,7 +71,7 @@ export default function VerificacionCLC() {
   const fetchCLCData = async ({ anio, mes }) => {
     try {
       const response = await fetch(
-        `http://192.168.100.25:7080/Nomina/verificacionClc?mes=${mes}&anio=${anio}`
+        `${API_BASE_URL}/verificacionClc?mes=${mes}&anio=${anio}`
       );
 
       if (!response.ok) throw new Error('Error al obtener datos de verificación CLC.');
@@ -133,7 +133,7 @@ export default function VerificacionCLC() {
 
       // Servicio para subir el archivo
       const uploadResponse = await fetch(
-        `http://192.168.100.25:7080/Nomina/SubirCLCs?quincena=${mes}&anio=${anio}&vuser=kevin&tipo_carga=CLC`,
+        `${API_BASE_URL}/SubirCLCs?quincena=${mes}&anio=${anio}&vuser=kevin&tipo_carga=CLC`,
         {
           method: 'POST',
           body: formDataToSend,
@@ -150,7 +150,7 @@ export default function VerificacionCLC() {
       const descripcion = formData.comentario;
 
       const validateResponse = await fetch(
-        `http://192.168.100.25:7080/Nomina/validarEdocta?parametroBusqueda=${encodeURIComponent(
+        `${API_BASE_URL}/validarEdocta?parametroBusqueda=${encodeURIComponent(
           parametroBusqueda
         )}&descripcion=${encodeURIComponent(descripcion)}&evidenciaPdf=${encodeURIComponent(fileName)}`,
         {

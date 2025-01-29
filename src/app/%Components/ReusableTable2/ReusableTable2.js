@@ -137,45 +137,48 @@ const ReusableTable2 = ({
             />
             <TableContainer>
                 <Table>
-                    <TableHeaderRow
-                        columns={columns}
-                        deletable={deletable}
-                        data={data}
-                        filteredData={filteredData} // Pasar los datos filtrados
-                        selectedRows={selectedRows}
-                        setSelectedRows={setSelectedRows}
-                        handleSelectAll={handleSelectAll}
-                    />
-                    <TableBody>
-                        {creatingRow && (
-                            <TableRowComponent
-                                row={newRowData}
-                                columns={columns}
-                                editable
-                                isNewRow
-                                nominaOptions={nominaOptions}
-                                onSave={handleSaveNewRow}
-                                onCancel={() => setCreatingRow(false)}
-                                selectedRows={selectedRows}
-                                handleSelectRow={handleSelectRow}
-                            />
-                        )}
-                        {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                            <TableRowComponent
-                                key={row.id_universo || row.id}
-                                row={row}
-                                columns={columns}
-                                editable={editable}
-                                nominaOptions={nominaOptions}
-                                onSave={handleSaveEdit}
-                                onCancel={() => setEditingRow(null)}
-                                selectedRows={selectedRows}
-                                handleSelectRow={handleSelectRow}
-                                onDoubleClick={() => setEditingRow(row)} // Permitir edición al hacer doble clic
-                            />
-                        ))}
-                    </TableBody>
-                </Table>
+  <thead>
+    <TableHeaderRow
+      columns={columns}
+      deletable={deletable}
+      data={data}
+      filteredData={filteredData}
+      selectedRows={selectedRows}
+      setSelectedRows={setSelectedRows}
+      handleSelectAll={handleSelectAll}
+    />
+  </thead>
+  <tbody>
+    {creatingRow && (
+      <TableRowComponent
+        row={newRowData}
+        columns={columns}
+        editable
+        isNewRow
+        nominaOptions={nominaOptions}
+        onSave={handleSaveNewRow}
+        onCancel={() => setCreatingRow(false)}
+        selectedRows={selectedRows}
+        handleSelectRow={handleSelectRow}
+      />
+    )}
+    {filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+      <TableRowComponent
+        key={row.id_universo || row.id}
+        row={row}
+        columns={columns}
+        editable={editable}
+        nominaOptions={nominaOptions}
+        onSave={handleSaveEdit}
+        onCancel={() => setEditingRow(null)}
+        selectedRows={selectedRows}
+        handleSelectRow={handleSelectRow}
+        onDoubleClick={() => setEditingRow(row)}
+      />
+    ))}
+  </tbody>
+</Table>
+
             </TableContainer>
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
