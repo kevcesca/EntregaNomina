@@ -127,11 +127,12 @@ const ReusableTable = ({
     // Función para eliminar filas seleccionadas
     const handleDeleteSelected = () => {
         if (onDelete && selectedRows.length > 0) {
-            const deletePromises = selectedRows.map((row) => onDelete(row.id_concepto || row.id)); // Extrae solo el ID
-
+            // Ahora usamos únicamente row.id 
+            const deletePromises = selectedRows.map((row) => onDelete(row.id));
+    
             Promise.all(deletePromises)
                 .then((results) => {
-                    const allDeleted = results.every((result) => result); // Verifica si todos se eliminaron correctamente
+                    const allDeleted = results.every((result) => result); 
                     if (allDeleted) {
                         toast.current.show({
                             severity: 'success',
@@ -157,7 +158,7 @@ const ReusableTable = ({
         } else {
             console.error("onDelete prop is not defined or no rows selected");
         }
-    };
+    };    
 
     // Manejar la apertura y cierre del modal de exportación
     const handleExportModalOpen = () => {
@@ -173,19 +174,22 @@ const ReusableTable = ({
     };
 
     const handleSelectRow = (row) => {
-        const isSelected = selectedRows.some((selected) => selected.id === row.id);
-        if (isSelected) {
-            // Si ya está seleccionada, la quitamos
-            setSelectedRows((prev) => prev.filter((selected) => selected.id !== row.id));
-        } else {
-            // Si no está seleccionada, la agregamos
-            setSelectedRows([row]); // Solo permite seleccionar una fila
-        }
+        setSelectedRows((prevSelected) => {
+            // Usa row.id para verificar si ya está en la lista
+            const isSelected = prevSelected.some(selected => selected.id === row.id);
+            if (isSelected) {
+                // Quitar de la lista
+                return prevSelected.filter(selected => selected.id !== row.id);
+            } else {
+                // Agregar a la lista
+                return [...prevSelected, row];
+            }
+        });
     };
 
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            setSelectedRows(filteredData); // Selecciona todas las filas
+            setSelectedRows(filteredData); // Guarda todas las filas visibles
         } else {
             setSelectedRows([]); // Deselecciona todas
         }
@@ -276,11 +280,11 @@ const ReusableTable = ({
                     <TableHeaderRow
                         columns={columns}
                         deletable={deletable}
-                        data={data}
+                        data={filteredData} // Aquí se pasa filteredData
                         selectedRows={selectedRows}
                         setSelectedRows={setSelectedRows}
-                        handleSelectAll={handleSelectAll}
                     />
+
                     <TableBody>
                         {creatingRow && (
                             <TableRowComponent
@@ -301,7 +305,7 @@ const ReusableTable = ({
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => (
                                 <TableRowComponent
-                                    key={row.id_concepto || row.id}
+                                    key={row.id}
                                     row={row}
                                     columns={columns}
                                     editable={editable}

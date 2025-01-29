@@ -31,13 +31,13 @@ const TableRowComponent = ({
             // Solo permitir números en id_concepto
             if (!/^\d*$/.test(value)) return;
         }
-    
+
         setEditedRow((prevRow) => ({
             ...prevRow,
             [colAccessor]: colAccessor === "nombre_concepto" ? value.toUpperCase() : value, // Convertir a mayúsculas
         }));
     };
-    
+
 
     const handleSaveClick = () => {
         onSave(editedRow);
@@ -55,9 +55,10 @@ const TableRowComponent = ({
             <TableCell padding="checkbox">
                 {!isNewRow && (
                     <Checkbox
-                        checked={Array.isArray(selectedRows) && selectedRows.includes(row)}
+                        checked={selectedRows.some(selected => selected.id === row.id)}
                         onChange={() => handleSelectRow(row)}
                     />
+
                 )}
             </TableCell>
             {columns.map((col) => (

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Box, Typography, Autocomplete, Alert } from "@mui/material";
 import ReusableTable from "../ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
 import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig"; // URL base para los servicios
+import styles from './ReporteTipoPago.module.css';
 
 
 const ReportesPage = () => {
@@ -82,38 +83,40 @@ const ReportesPage = () => {
                 Reportes de Nómina
             </Typography>
             <Grid container spacing={2} sx={{ marginBottom: 3 }}>
-                <Grid item xs={12} sm={6}>
-                    <TextField
-                        label="Año"
-                        variant="outlined"
-                        fullWidth
-                        value={anio}
-                        onChange={(e) => setAnio(e.target.value)}
-                        error={showErrors && !anio}
-                        helperText={showErrors && !anio ? "El año es requerido" : ""}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                    <Autocomplete
-                        options={employeeOptions}
-                        getOptionLabel={(option) => `${option.id_empleado} - ${option.nombre_completo}`}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                label="ID Empleado"
-                                required
-                                fullWidth
-                                margin="normal"
-                                error={showErrors && !idEmpleado}
-                                helperText={showErrors && !idEmpleado ? "El ID del empleado es requerido" : ""}
-                            />
-                        )}
-                        onChange={(event, value) => setIdEmpleado(value?.id_empleado || "")}
-                        isOptionEqualToValue={(option, value) =>
-                            option.id_empleado === value?.id_empleado
-                        }
-                    />
-                </Grid>
+                <div className={styles.form}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            label="Año"
+                            variant="outlined"
+                            fullWidth
+                            value={anio}
+                            onChange={(e) => setAnio(e.target.value)}
+                            error={showErrors && !anio}
+                            helperText={showErrors && !anio ? "El año es requerido" : ""}
+                        />
+                    </Grid>
+                    <Grid className={styles.idEmpleado} item xs={12} sm={6}>
+                        <Autocomplete
+                            options={employeeOptions}
+                            getOptionLabel={(option) => `${option.id_empleado} - ${option.nombre_completo}`}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="ID Empleado"
+                                    required
+                                    fullWidth
+                                    margin="normal"
+                                    error={showErrors && !idEmpleado}
+                                    helperText={showErrors && !idEmpleado ? "El ID del empleado es requerido" : ""}
+                                />
+                            )}
+                            onChange={(event, value) => setIdEmpleado(value?.id_empleado || "")}
+                            isOptionEqualToValue={(option, value) =>
+                                option.id_empleado === value?.id_empleado
+                            }
+                        />
+                    </Grid>
+                </div>
                 <Grid item xs={12}>
                     <Button
                         variant="contained"
