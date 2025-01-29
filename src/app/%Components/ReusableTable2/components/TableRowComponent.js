@@ -53,32 +53,35 @@ const TableRowComponent = ({
         />
       </TableCell>
       {/* Renderizado de columnas */}
-      {columns.map((col) => (
-        <TableCell key={col.accessor}>
-          {isEditing && col.accessor === "nombre_nomina" ? (
-            <Select
-              value={editedRow[col.accessor] || ""}
-              onChange={(e) => handleInputChange(col.accessor, e.target.value)}
-              fullWidth
-            >
-              {nominaOptions.map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
-          ) : isEditing ? (
-            <TextField
-              value={editedRow[col.accessor] || ""}
-              onChange={(e) => handleInputChange(col.accessor, e.target.value)}
-              fullWidth
-              variant="standard"
-            />
-          ) : (
-            row[col.accessor]
-          )}
-        </TableCell>
-      ))}
+      {columns.map((col, index) => (
+  <TableCell key={col.accessor}>
+    {isEditing && (isNewRow || index === 1) ? ( // 🔴 Solo permite editar la SEGUNDA columna (index === 1)
+      col.accessor === "nombre_nomina" ? ( 
+        <Select
+          value={editedRow[col.accessor] || ""}
+          onChange={(e) => handleInputChange(col.accessor, e.target.value)}
+          fullWidth
+        >
+          {nominaOptions.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option}
+            </MenuItem>
+          ))}
+        </Select>
+      ) : (
+        <TextField
+          value={editedRow[col.accessor] || ""}
+          onChange={(e) => handleInputChange(col.accessor, e.target.value)}
+          fullWidth
+          variant="standard"
+        />
+      )
+    ) : (
+      row[col.accessor] // 🔴 Para la primera columna (index === 0), se muestra solo el valor sin edición
+    )}
+  </TableCell>
+))}
+
       {/* Botones de Aceptar y Cancelar */}
       {isEditing && (
         <TableCell>
