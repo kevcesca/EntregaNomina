@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { TableRow, TableCell, Checkbox, TextField, IconButton } from "@mui/material";
+import { TableRow, TableCell, Checkbox, TextField, IconButton, Button } from "@mui/material";
 import { Save, Close } from "@mui/icons-material";
 
 const TableRowComponent = ({
@@ -31,13 +31,13 @@ const TableRowComponent = ({
             // Solo permitir números en id_concepto
             if (!/^\d*$/.test(value)) return;
         }
-    
+
         setEditedRow((prevRow) => ({
             ...prevRow,
             [colAccessor]: colAccessor === "nombre_concepto" ? value.toUpperCase() : value, // Convertir a mayúsculas
         }));
     };
-    
+
 
     const handleSaveClick = () => {
         onSave(editedRow);
@@ -54,10 +54,15 @@ const TableRowComponent = ({
         <TableRow onDoubleClick={handleDoubleClick} style={{ cursor: editable ? "pointer" : "default" }}>
             <TableCell padding="checkbox">
                 {!isNewRow && (
-                    <Checkbox
-                        checked={Array.isArray(selectedRows) && selectedRows.includes(row)}
-                        onChange={() => handleSelectRow(row)}
-                    />
+                 <Checkbox
+                 checked={selectedRows.includes(row.id || row.id_concepto)} // Verifica el ID
+                 onChange={() => handleSelectRow(row)}
+             />
+             
+             
+             
+               
+
                 )}
             </TableCell>
             {columns.map((col) => (
@@ -85,12 +90,12 @@ const TableRowComponent = ({
             ))}
             {(isEditing || isNewRow) && (
                 <TableCell>
-                    <IconButton color="success" onClick={handleSaveClick}>
-                        <Save />
-                    </IconButton>
-                    <IconButton color="error" onClick={handleCancelClick}>
-                        <Close />
-                    </IconButton>
+                    <Button color="primary" variant="contained" style={{}} onClick={handleSaveClick}>
+                        Aceptar
+                    </Button>
+                    <Button color="primary" variant="contained" style={{ margin: "10px" }} onClick={handleCancelClick}>
+                        Cancelar
+                    </Button>
                 </TableCell>
             )}
         </TableRow>

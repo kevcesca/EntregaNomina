@@ -3,17 +3,24 @@ import PropTypes from "prop-types";
 import { TableRow, TableCell, Checkbox } from "@mui/material";
 import styles from "../ReusableTable.module.css";
 
-const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRows }) => (
+const TableHeaderRow = ({
+    columns,
+    deletable,
+    filteredData = [], // Usamos filteredData
+    selectedRows = [], // Aseguramos valores por defecto
+    handleSelectAll,
+}) => (
     <TableRow>
-        <TableCell padding="checkbox" className={styles.tableCell} >
+        <TableCell padding="checkbox" className={styles.tableCell}>
             <Checkbox
                 indeterminate={
-                    selectedRows.length > 0 && selectedRows.length < data.length
+                    selectedRows.length > 0 && selectedRows.length < filteredData.length
                 }
-                checked={data.length > 0 && selectedRows.length === data.length}
-                onChange={(event) =>
-                    setSelectedRows(event.target.checked ? data.map((row) => row) : [])
+                checked={
+                    filteredData.length > 0 &&
+                    selectedRows.length === filteredData.length
                 }
+                onChange={handleSelectAll}
             />
         </TableCell>
         {columns.map((col, index) => (
@@ -27,9 +34,9 @@ const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRow
 TableHeaderRow.propTypes = {
     columns: PropTypes.array.isRequired,
     deletable: PropTypes.bool.isRequired,
-    data: PropTypes.array.isRequired,
-    selectedRows: PropTypes.array.isRequired,
-    setSelectedRows: PropTypes.func.isRequired,
+    filteredData: PropTypes.array, // Cambiamos data a filteredData
+    selectedRows: PropTypes.array,
+    handleSelectAll: PropTypes.func.isRequired,
 };
 
 export default TableHeaderRow;

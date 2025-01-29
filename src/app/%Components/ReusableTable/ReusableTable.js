@@ -6,7 +6,12 @@ import {
     TableContainer,
     Paper,
     TablePagination,
-    Button
+    Button,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    Typography,
+    DialogActions
 } from "@mui/material";
 import styles from "./ReusableTable.module.css";
 import Header from "./components/Header";
@@ -17,6 +22,7 @@ import { Toast } from 'primereact/toast';
 import "primereact/resources/themes/lara-light-indigo/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import API_BASE_URL from '../../%Config/apiConfig';
 
 const ReusableTable = ({
     columns,
@@ -37,8 +43,12 @@ const ReusableTable = ({
     const [newRowData, setNewRowData] = useState({});
     const [isExportModalOpen, setExportModalOpen] = useState(false);
     const [data, setData] = useState([]); // Estado para los datos de la tabla
+    // const [filteredData, setFilteredData] = useState({});
     const toast = useRef(null); // Referencia para el Toast
     const [searchQuery, setSearchQuery] = useState("");
+    const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [rowToDelete, setRowToDelete] = useState(null);
+
 
     // Obtener los datos al cargar el componente
     useEffect(() => {
@@ -51,6 +61,20 @@ const ReusableTable = ({
                 });
         }
     }, [fetchData]);
+
+    // {filteredData.map((row) =>
+    //     row ? (
+    //         <TableRowComponent
+    //             key={row.id || row.id_concepto}
+    //             row={row}
+    //             columns={columns}
+    //             editable={editable}
+    //             handleSelectRow={handleSelectRow}
+    //             selectedRows={selectedRows}
+    //         />
+    //     ) : null
+    // )}
+
 
     // Iniciar creación de una nueva fila
     const handleCreate = () => {
@@ -65,33 +89,54 @@ const ReusableTable = ({
         setEditingRow(emptyRow);
     };
 
+    const confirmDelete = (id) => {
+        setRowToDelete(id);
+        setDeleteModalOpen(true); // Abre el modal
+    };
+
     // Guardar la nueva fila
-    const handleSaveNewRow = (newRow) => {
+    const handleSaveNewRow = async (newRow) => {
         if (onInsert) {
-            onInsert(newRow)
-                .then(() => {
-                    fetchData().then((response) => {
-                        setData(response);
-                        setSelectedRows([]); // Limpia la selección al crear un nuevo concepto
-                    });
-                    setCreatingRow(false);
-                    setNewRowData({});
-                    setEditingRow(null);
-                    toast.current.show({
-                        severity: "success",
-                        summary: "Éxito",
-                        detail: "Elemento creado correctamente",
-                        life: 3000,
-                    });
-                })
-                .catch((error) => {
-                    console.error("Error al insertar:", error);
-                    showErrorToast(error);
+            try {
+                await onInsert(newRow);
+
+                fetchData().then((response) => {
+                    setData(response);
+                    setSelectedRows([]); // Limpia la selección después de insertar
                 });
+
+                setCreatingRow(false);
+                setNewRowData({});
+                setEditingRow(null);
+
+                toast.current.show({
+                    severity: "success",
+                    summary: "Éxito",
+                    detail: "Concepto creado correctamente",
+                    life: 3000,
+                });
+            } catch (error) {
+                console.error("Error al insertar:", error);
+
+                let mensajeError = "Error desconocido al insertar el concepto.";
+
+                // Analizar el mensaje de error para detectar una clave duplicada
+                if (error.message.includes("llave duplicada")) {
+                    mensajeError = `Ya existe un concepto con el ID ${newRow.id_concepto}.`;
+                }
+
+                toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: mensajeError,
+                    life: 5000,
+                });
+            }
         } else {
             console.error("onInsert prop is not defined");
         }
     };
+
 
     const handleCancelNewRow = () => {
         setCreatingRow(false);
@@ -125,39 +170,118 @@ const ReusableTable = ({
     };
 
     // Función para eliminar filas seleccionadas
-    const handleDeleteSelected = () => {
-        if (onDelete && selectedRows.length > 0) {
-            const deletePromises = selectedRows.map((row) => onDelete(row.id_concepto || row.id)); // Extrae solo el ID
+    const handleDeleteSelected = async () => {
+        if (selectedRows.length === 0) {
+            toast.current.show({
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'No hay filas seleccionadas para eliminar.',
+                life: 3000,
+            });
+            return;
+        }
+        
+        setRowToDelete(selectedRows);
+        setDeleteModalOpen(true);
 
-            Promise.all(deletePromises)
-                .then((results) => {
-                    const allDeleted = results.every((result) => result); // Verifica si todos se eliminaron correctamente
-                    if (allDeleted) {
-                        toast.current.show({
-                            severity: 'success',
-                            summary: 'Éxito',
-                            detail: 'Elementos eliminados correctamente',
-                            life: 3000,
-                        });
-                    } else {
-                        toast.current.show({
-                            severity: 'warn',
-                            summary: 'Advertencia',
-                            detail: 'Algunos elementos no se pudieron eliminar',
-                            life: 3000,
-                        });
-                    }
-                    fetchData().then((response) => setData(response)); // Refresca los datos
-                    setSelectedRows([]); // Limpia la selección
-                })
-                .catch((error) => {
-                    console.error("Error deleting rows:", error);
-                    showErrorToast(error); // Muestra mensaje de error
+        try {
+            // Itera sobre los IDs seleccionados y llama a handleDeleteConcepto
+            const deletePromises = selectedRows.map((id) => handleDeleteConcepto(id));
+            const results = await Promise.all(deletePromises);
+
+            // Verifica si alguna eliminación falló
+            const allDeleted = results.every((result) => result === true);
+            if (allDeleted) {
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: 'Todos los conceptos seleccionados se eliminaron correctamente.',
+                    life: 3000,
                 });
-        } else {
-            console.error("onDelete prop is not defined or no rows selected");
+            } else {
+                toast.current.show({
+                    severity: 'warn',
+                    summary: 'Advertencia',
+                    detail: 'Algunos conceptos no se pudieron eliminar.',
+                    life: 3000,
+                });
+            }
+
+            // Refresca los datos después de eliminar
+            const updatedData = await fetchData();
+            setData(updatedData);
+            setSelectedRows([]); // Limpia la selección
+        } catch (error) {
+            console.error('Error al eliminar conceptos:', error);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message || 'Ocurrió un error al eliminar los conceptos.',
+                life: 3000,
+            });
         }
     };
+
+    const handleDeleteConcepto = async (id) => {
+        const response = await fetch(
+            `${API_BASE_URL}/eliminarConcepto?id_conceptos=${id}`,
+            { method: 'GET' }
+        );
+        if (!response.ok) {
+            const errorData = await response.json();
+            const errorMessage = errorData.message || 'Error al eliminar el concepto';
+            throw new Error(errorMessage);
+        }
+        return true;
+    };
+
+    const handleConfirmedDelete = async () => {
+        if (!rowToDelete || rowToDelete.length === 0) return;
+    
+        try {
+            // Llamar a la API para eliminar cada ID seleccionado
+            const deletePromises = rowToDelete.map((id) => handleDeleteConcepto(id));
+            const results = await Promise.all(deletePromises);
+    
+            // Verificar si todos los registros fueron eliminados
+            const allDeleted = results.every((result) => result === true);
+            if (allDeleted) {
+                toast.current.show({
+                    severity: 'success',
+                    summary: 'Éxito',
+                    detail: 'Los registros seleccionados fueron eliminados correctamente.',
+                    life: 3000,
+                });
+            } else {
+                toast.current.show({
+                    severity: 'warn',
+                    summary: 'Advertencia',
+                    detail: 'Algunos registros no pudieron eliminarse.',
+                    life: 3000,
+                });
+            }
+    
+            // Refrescar datos después de eliminar
+            const updatedData = await fetchData();
+            setData(updatedData);
+            setSelectedRows([]); // Limpiar selección
+    
+        } catch (error) {
+            console.error('Error al eliminar registros:', error);
+            toast.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: error.message || 'Ocurrió un error al eliminar los registros.',
+                life: 5000,
+            });
+        }
+    
+        setDeleteModalOpen(false); // Cerrar modal después de la eliminación
+        setRowToDelete([]); // Limpiar estado
+    };
+    
+
+
 
     // Manejar la apertura y cierre del modal de exportación
     const handleExportModalOpen = () => {
@@ -173,32 +297,45 @@ const ReusableTable = ({
     };
 
     const handleSelectRow = (row) => {
-        const isSelected = selectedRows.some((selected) => selected.id === row.id);
-        if (isSelected) {
-            // Si ya está seleccionada, la quitamos
-            setSelectedRows((prev) => prev.filter((selected) => selected.id !== row.id));
-        } else {
-            // Si no está seleccionada, la agregamos
-            setSelectedRows([row]); // Solo permite seleccionar una fila
-        }
+        const rowId = row?.id || row?.id_concepto; // Obtén el identificador
+        if (!rowId) return; // Si no tiene ID, no hacemos nada
+
+        setSelectedRows((prevSelectedRows) =>
+            prevSelectedRows.includes(rowId)
+                ? prevSelectedRows.filter((id) => id !== rowId) // Deseleccionar
+                : [...prevSelectedRows, rowId] // Seleccionar
+        );
     };
+
+
 
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            setSelectedRows(filteredData); // Selecciona todas las filas
+            const validRowIds = filteredData
+                .filter((row) => row && (row.id || row.id_concepto)) // Filtra filas válidas
+                .map((row) => row.id || row.id_concepto); // Extrae IDs válidos
+
+            setSelectedRows(validRowIds);
         } else {
-            setSelectedRows([]); // Deselecciona todas
+            setSelectedRows([]); // Deselecciona todo
         }
     };
 
-    // Filtrar datos según la búsqueda
-    const filteredData = data.filter((row) =>
-        columns.some((col) =>
-            (row[col.accessor] || "")
-                .toString()
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
+
+    const filteredData = Array.isArray(data)
+        ? data.filter((row) =>
+            columns.some((col) =>
+                ((row && row[col.accessor]) || "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())
+            )
         )
+        : []; // Valor predeterminado si data no está definido
+
+
+    const selectedData = filteredData.filter((row) =>
+        selectedRows.includes(row.id || row.id_concepto) // Verifica IDs válidos
     );
 
     // Función para mostrar el toast de error personalizado
@@ -209,7 +346,16 @@ const ReusableTable = ({
         if (error.response) {
             // El servidor respondió con un código de estado fuera del rango 2xx
             statusCode = error.response.status;
-            mensajeCorto = `Error ${statusCode}: ${error.message}`; // Mensaje con código de estado
+            mensajeCorto = `Error ${statusCode}: ${error.message}`;
+
+            // 🛑 Detectar si el error es por "llave duplicada"
+            if (error.response.data?.message?.includes("llave duplicada") ||
+                error.response.data?.message?.includes("duplicate key")) {
+                mensajeCorto = "Este ID ya existe en la base de datos. Intenta con otro.";
+            }
+        } else if (error.message.includes("llave duplicada") || error.message.includes("duplicate key")) {
+            // Si el mensaje contiene "llave duplicada" (en español) o "duplicate key"
+            mensajeCorto = "Este ID ya existe en la base de datos. Intenta con otro.";
         } else if (error.request) {
             // La solicitud fue hecha pero no se recibió respuesta
             mensajeCorto = "Error: No se recibió respuesta del servidor";
@@ -218,6 +364,7 @@ const ReusableTable = ({
             mensajeCorto = error.message;
         }
 
+        // Mostrar el mensaje en el Toast
         toast.current.show({
             severity: 'error',
             summary: 'Error',
@@ -235,7 +382,7 @@ const ReusableTable = ({
                                 summary: 'Detalles del Error',
                                 detail: (
                                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                        {statusCode && <div>Código de estado: {statusCode}</div>}
+                                        {statusCode && <div><strong>Código de estado:</strong> {statusCode}</div>}
                                         {error.message}
                                         {error.response && (
                                             <>
@@ -258,6 +405,8 @@ const ReusableTable = ({
     };
 
     return (
+
+
         <Paper className={styles.tableContainer}>
             <Toast ref={toast} />
             <Header
@@ -276,7 +425,8 @@ const ReusableTable = ({
                     <TableHeaderRow
                         columns={columns}
                         deletable={deletable}
-                        data={data}
+                        data={data} // Puedes mantener el dataset completo si lo necesitas
+                        filteredData={filteredData} // Pasamos las filas visibles                        selectedRows={selectedRows}
                         selectedRows={selectedRows}
                         setSelectedRows={setSelectedRows}
                         handleSelectAll={handleSelectAll}
@@ -332,9 +482,30 @@ const ReusableTable = ({
             <ExportModal
                 open={isExportModalOpen}
                 onClose={handleExportModalClose}
-                selectedRows={selectedRows}
+                selectedRows={selectedData}
                 columns={columns}
             />
+
+<Dialog
+    open={isDeleteModalOpen}
+    onClose={() => setDeleteModalOpen(false)}
+>
+    <DialogTitle>Confirmar eliminación</DialogTitle>
+    <DialogContent>
+        <Typography>¿Estás seguro de que deseas eliminar los registros seleccionados?</Typography>
+    </DialogContent>
+    <DialogActions>
+        <Button onClick={() => setDeleteModalOpen(false)} color="secondary">
+            Cancelar
+        </Button>
+        <Button onClick={handleConfirmedDelete} color="error" variant="contained">
+            Eliminar
+        </Button>
+    </DialogActions>
+</Dialog>
+
+
+
         </Paper>
     );
 };
