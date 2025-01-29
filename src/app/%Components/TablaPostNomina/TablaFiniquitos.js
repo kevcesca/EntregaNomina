@@ -62,45 +62,52 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
 
     const handleFileSelection = (event) => {
         const selectedFiles = Array.from(event.target.files);
-        if (selectedFiles.length !== 2) {
+    
+        // 🔥 Si ya hay archivos subidos, permite subir solo los faltantes hasta completar 2
+        if (finiquitos.length + selectedFiles.length > 2) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
-                detail: 'Debes seleccionar exactamente 2 archivos.',
+                detail: 'Solo puedes subir hasta 2 archivos.',
                 life: 3000,
             });
             return;
         }
-        setFilesToUpload(selectedFiles);
+    
+        setFilesToUpload((prevFiles) => [...prevFiles, ...selectedFiles]); // ✅ Agrega archivos sin reemplazar
         setIsUploadDialogOpen(true);
+    
+        event.target.value = null; // 🔄 Reset input para evitar problemas al seleccionar los mismos archivos
     };
+    
 
     const handleFileUpload = async () => {
-        if (filesToUpload.length !== 2) return;
-
+        if (filesToUpload.length === 0) return;
+    
         setIsLoading(true);
+        setIsUploadDialogOpen(false);
+    
         try {
             for (const file of filesToUpload) {
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('extra', '');
-
+    
                 const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${anio}&tipo=Finiquitos&usuario=${session || 'unknown'}`;
                 await axios.post(uploadURL, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
             }
-
+    
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
                 detail: 'Archivos subidos correctamente.',
                 life: 3000,
             });
-
-            setFilesToUpload([]);
-            setIsUploadDialogOpen(false);
-            fetchFiniquitosData();
+    
+            await fetchFiniquitosData(); // 🔄 Refresca lista después de la subida
+    
         } catch (error) {
             toast.current.show({
                 severity: 'error',
@@ -109,9 +116,11 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
                 life: 5000,
             });
         } finally {
+            setFilesToUpload([]); // ✅ Limpia la lista de archivos
             setIsLoading(false);
         }
     };
+    
 
     const handleFileDownload = async (idx, archivoNombre) => {
         try {
@@ -145,46 +154,42 @@ export default function TablaFiniquitos({ quincena, anio, session }) {
     };
 
     const handleDeleteFile = async () => {
-        if (!fileToDelete || !fileToDelete.idx) {
+        if (!fileToDelete || !fileToDelete.idx) return;
+    
+        setIsLoading(true);
+    
+        try {
+            await axios.get(`${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`);
+    
             toast.current.show({
-                severity: 'warn',
-                summary: 'Advertencia',
-                detail: 'No se encontró un identificador válido para el archivo.',
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Archivo eliminado correctamente.',
                 life: 3000,
             });
-            return;
-        }
-
-        setIsLoading(true);
-        try {
-            const deleteURL = `${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`;
-            const response = await axios.get(deleteURL);
-
-            if (response.status === 200 && response.data.includes('eliminado correctamente')) {
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Archivo eliminado correctamente.',
-                    life: 3000,
-                });
-
-                setFileToDelete(null);
-                setIsDeleteDialogOpen(false);
-                fetchFiniquitosData();
-            } else {
-                throw new Error('Error al eliminar el archivo.');
-            }
+    
+            setFiniquitos((prev) => {
+                const updatedFiles = prev.filter((file) => file.idx !== fileToDelete.idx);
+                setIsUploadDisabled(updatedFiles.length >= 2); // ✅ Permite subir si hay menos de 2 archivos
+                setCanProcess(updatedFiles.length === 2); // ✅ Deshabilita "Procesar Nómina" si hay menos de 2 archivos
+                return updatedFiles;
+            });
+    
+            setIsDeleteDialogOpen(false);
+            setFileToDelete(null);
+    
         } catch (error) {
             toast.current.show({
                 severity: 'error',
-                summary: 'Error al eliminar',
-                detail: 'Hubo un problema al eliminar el archivo.',
+                summary: 'Error',
+                detail: 'No se pudo eliminar el archivo.',
                 life: 5000,
             });
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     const handleProcesarFiniquitos = async () => {
         setIsProcessing(true);
