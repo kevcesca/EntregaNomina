@@ -1,206 +1,244 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { InputText } from 'primereact/inputtext';
-import { FilterMatchMode, FilterService } from 'primereact/api';
+import React, { useEffect, useState, useRef } from 'react';
+import {
+    Table,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Checkbox,
+    TextField,
+    InputAdornment,
+    TablePagination,
+    Paper,
+    Button,
+    Box,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ExportModal from '../ReusableTableDepositoResumen/components/ExportModal';
 import axios from 'axios';
-import { Button, Box } from '@mui/material';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
-import saveAs from 'file-saver';
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
-import styles from './Tablas.module.css';
+import { Toast } from 'primereact/toast';
+import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css";
 import API_BASE_URL from '../../%Config/apiConfig';
 
-// Registrar filtro personalizado
-FilterService.register('custom_range', (value, filter) => {
-    const [from, to] = filter ?? [null, null];
-    if (from === null && to === null) return true;
-    if (from !== null && to === null) return from <= value;
-    if (from === null && to !== null) return value <= to;
-    return from <= value && value <= to;
-});
+const columns = [
+    { label: 'Sector Presupuestal', accessor: 'sectpres' },
+    { label: 'Nómina', accessor: 'nomina' },
+    { label: 'ID Concepto', accessor: 'id_concepto1' }, // ✅ CORREGIDO
+    { label: 'Nombre Concepto', accessor: 'nombre_concepto' },
+    { label: 'Deducciones', accessor: 'deducciones' },
+];
 
 export default function DeduccionesTabla({ anio, quincena, nombreNomina }) {
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [filters, setFilters] = useState({
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        sectpres: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-        nomina: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-        id_concepto1: { value: null, matchMode: FilterMatchMode.EQUALS },
-        nombre_concepto: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        deducciones: { value: null, matchMode: FilterMatchMode.CUSTOM },
-    });
-    const [globalFilterValue, setGlobalFilterValue] = useState('');
+    const [filteredData, setFilteredData] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedRows, setSelectedRows] = useState([]);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [page, setPage] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+    const toastRef = useRef(null);
+    const [extraExportData, setExtraExportData] = useState(null);
 
     useEffect(() => {
         if (anio && quincena && nombreNomina) {
-            fetchData(anio, quincena, nombreNomina);
+            fetchData();
         }
     }, [anio, quincena, nombreNomina]);
 
-    const fetchData = async (anio, quincena, nombreNomina) => {
-        setLoading(true);
+    const fetchData = async () => {
+        setIsLoading(true);
         try {
             const response = await axios.get(`${API_BASE_URL}/NominaCtrl/DeduccionesSeparadas`, {
-                params: {
-                    anio,
-                    quincena,
-                    nombre: nombreNomina,
-                    cancelado: false,
-                    completado: true,
-                },
+                params: { anio, quincena, nombre: nombreNomina, cancelado: false, completado: true },
             });
-            setData(response.data);
+
+            const cleanData = response.data.map((row) => ({
+                ...row,
+                deducciones: parseFloat(row.deducciones?.replace(/,/g, '').trim() || 0),
+            }));
+
+            setData(cleanData);
+            setFilteredData(cleanData);
         } catch (error) {
-            console.error('Error fetching data', error);
+            toastRef.current.show({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Hubo un problema al obtener los datos.',
+                life: 3000,
+            });
+        } finally {
+            setIsLoading(false);
         }
-        setLoading(false);
     };
 
-    // Calcular el total de deducciones
-    const totalDeducciones = data.reduce((total, item) => {
-        const deduccion = parseFloat(item.deducciones.replace(/,/g, ''));
-        return total + (isNaN(deduccion) ? 0 : deduccion);
-    }, 0);
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredData(data);
+        } else {
+            setFilteredData(
+                data.filter(row =>
+                    columns.some(col =>
+                        String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
+                    )
+                )
+            );
+        }
+        setPage(0);
+        setSelectedRows([]);
+    }, [searchQuery, data]);
 
-    const onGlobalFilterChange = (e) => {
-        const value = e.target.value;
-        setFilters((prevFilters) => ({
-            ...prevFilters,
-            global: { ...prevFilters.global, value },
-        }));
-        setGlobalFilterValue(value);
-    };
+    const handleSelectRow = (row) => {
+        setSelectedRows((prev) => {
+            const rowKey = `${row.sectpres}-${row.nomina}-${row.id_concepto1}`;
+            const isSelected = prev.some((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto1}` === rowKey);
 
-    const renderHeader = () => {
-        return (
-            <div className="flex justify-content-end">
-                <span className="p-input-icon-left">
-                    <i className="pi pi-search" />
-                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Buscar..." />
-                </span>
-            </div>
-        );
-    };
-
-    const currencyTemplate = (rowData) => {
-        return parseFloat(rowData.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    };
-
-    const header = renderHeader();
-
-    // Función para exportar a PDF
-    const exportPDF = () => {
-        const doc = new jsPDF();
-        const tableData = data.map(row => [
-            row.sectpres,
-            row.nomina,
-            row.id_concepto1,
-            row.nombre_concepto,
-            parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-        ]);
-
-        autoTable(doc, {
-            head: [['Sector Presupuestal', 'Nómina', 'ID Concepto', 'Nombre Concepto', 'Deducciones']],
-            body: tableData,
+            if (isSelected) {
+                return prev.filter((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto1}` !== rowKey);
+            } else {
+                return [...prev, row];
+            }
         });
-
-        // Añadir el total de deducciones
-        doc.text(`Total Deducciones: ${totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}`, 14, doc.lastAutoTable.finalY + 10);
-
-        doc.save(`Deducciones_QNA_${quincena}_${anio}.pdf`);
     };
 
-    // Función para exportar a Excel
-    const exportExcel = () => {
-        const worksheetData = data.map(row => ({
-            'Sector Presupuestal': row.sectpres,
-            Nómina: row.nomina,
-            'ID Concepto': row.id_concepto1,
-            'Nombre Concepto': row.nombre_concepto,
-            Deducciones: parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-        }));
 
-        // Añadir el total como última fila
-        worksheetData.push({
-            'Sector Presupuestal': '',
-            Nómina: '',
-            'ID Concepto': '',
-            'Nombre Concepto': 'Total',
-            Deducciones: totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-        });
-
-        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-        const workbook = { Sheets: { data: worksheet }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-        saveAs(new Blob([excelBuffer], { type: 'application/octet-stream' }), `Deducciones_QNA_${quincena}_${anio}.xlsx`);
+    const handleSelectAll = (checked) => {
+        if (checked) {
+            setSelectedRows(filteredData); // Selecciona todas las filas filtradas
+        } else {
+            setSelectedRows([]);
+        }
     };
 
-    // Función para exportar a CSV
-    const exportCSV = () => {
-        const csvContent = [
-            ['Sector Presupuestal', 'Nómina', 'ID Concepto', 'Nombre Concepto', 'Deducciones'].join(','),
-            ...data.map(row =>
-                [
-                    row.sectpres,
-                    row.nomina,
-                    row.id_concepto1,
-                    row.nombre_concepto,
-                    parseFloat(row.deducciones.replace(/,/g, '')).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-                ].join(',')
-            ),
-            ['', '', '', 'Total', totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })],
-        ].join('\n');
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, `Deducciones_QNA_${quincena}_${anio}.csv`);
+    const handleExportModalOpen = () => {
+        if (selectedRows.length === 0) {
+            toastRef.current.show({
+                severity: "warn",
+                summary: "Advertencia",
+                detail: "Selecciona al menos una fila para exportar.",
+                life: 3000,
+            });
+            return;
+        }
+
+        const extraData = selectedRows.length === filteredData.length
+            ? { sectpres: "TOTAL", nomina: "", id_concepto1: "", nombre_concepto: "TOTAL DEDUCCIONES", deducciones: totalDeducciones }
+            : null;
+
+        setExtraExportData(extraData);
+        setIsExportModalOpen(true);
     };
+
+
+    const totalDeducciones = filteredData.reduce((sum, row) => sum + (row.deducciones || 0), 0);
 
     return (
-        <div className={`card ${styles.card}`}>
-            <DataTable
-                value={data}
-                paginator
-                rows={10}
-                loading={loading}
-                filters={filters}
-                filterDisplay="row"
-                globalFilterFields={['sectpres', 'nomina', 'nombre_concepto']}
-                header={header}
-                emptyMessage="No se encontraron datos."
-                className="p-datatable-sm"
-            >
-                <Column field="sectpres" header="Sector Presupuestal" filter filterPlaceholder="Buscar..." sortable />
-                <Column field="nomina" header="Nómina" filter filterPlaceholder="Buscar..." sortable />
-                <Column field="id_concepto1" header="ID Concepto" filter filterPlaceholder="Buscar..." sortable />
-                <Column field="nombre_concepto" header="Nombre Concepto" filter filterPlaceholder="Buscar..." sortable />
-                <Column field="deducciones" header="Deducciones" body={currencyTemplate} sortable />
-            </DataTable>
+        <Paper className={styles.container}>
+            <Toast ref={toastRef} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, padding: '1rem' }}>
+                <TextField
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    placeholder="Buscar..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                    sx={{ backgroundColor: 'white', borderRadius: '8px' }}
+                />
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleExportModalOpen}
+                    disabled={selectedRows.length === 0}
+                >
+                    Exportar
+                </Button>
+            </Box>
 
-            {/* Sección de total */}
-            <div className={styles.totalContainer}>
+            <TableContainer>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {/* ✅ Checkbox con fondo blanco fuera del fondo rojo */}
+                            <TableCell padding="checkbox">
+                                <Checkbox
+                                    indeterminate={selectedRows.length > 0 && selectedRows.length < filteredData.length}
+                                    checked={selectedRows.length === filteredData.length}
+                                    onChange={(e) => handleSelectAll(e.target.checked)}
+                                />
+                            </TableCell>
+
+                            {columns.map((col) => (
+                                <TableCell key={col.accessor} sx={{ backgroundColor: '#9b1d1d', color: 'white', fontWeight: 'bold' }}>
+                                    {col.label}
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan={columns.length + 1} align="center">
+                                    Cargando...
+                                </TableCell>
+                            </TableRow>
+                        ) : filteredData.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={columns.length + 1} align="center">
+                                    No hay datos
+                                </TableCell>
+                            </TableRow>
+                        ) : (
+                            filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
+                                <TableRow key={`${row.sectpres}-${row.nomina}-${row.id_concepto1}`}>
+                                    <TableCell padding="checkbox">
+                                        <Checkbox
+                                            checked={selectedRows.some((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto1}` === `${row.sectpres}-${row.nomina}-${row.id_concepto1}`)}
+                                            onChange={() => handleSelectRow(row)}
+                                        />
+                                    </TableCell>
+
+                                    {columns.map((col) => (
+                                        <TableCell key={col.accessor}>
+                                            {col.accessor === 'deducciones'
+                                                ? row[col.accessor].toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                                                : row[col.accessor]}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+            <div style={{ padding: '1rem', textAlign: 'left' }}>
                 <h3>Total Deducciones: {totalDeducciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</h3>
             </div>
 
-            {/* Botones de Exportación */}
-            <Box display="flex" justifyContent="space-between" marginTop="20px">
-                <Button variant="outlined" color="primary" onClick={exportPDF}>
-                    Exportar PDF
-                </Button>
-                <Button variant="outlined" color="primary" onClick={exportExcel}>
-                    Exportar Excel
-                </Button>
-                <Button variant="outlined" color="primary" onClick={exportCSV}>
-                    Exportar CSV
-                </Button>
-            </Box>
-        </div>
+            <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                count={filteredData.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={(e, newPage) => setPage(newPage)}
+                onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
+            />
+
+
+
+            <ExportModal open={isExportModalOpen} onClose={() => setIsExportModalOpen(false)} selectedRows={selectedRows} columns={columns} extraData={extraExportData} />
+        </Paper>
     );
 }
