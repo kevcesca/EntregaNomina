@@ -75,7 +75,7 @@ const AprobarCargaNomina = () => {
                             )}
                         </Box>
                     </ProtectedView>
-
+<br></br>
                     {/* Botón para regresar a la página anterior */}
                     <Box className={styles.buttonContainer}>
                         <AsyncButton
