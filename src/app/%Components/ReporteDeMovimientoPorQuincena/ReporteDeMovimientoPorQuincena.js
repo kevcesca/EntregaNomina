@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Typography, Grid, TextField, Button, Alert } from "@mui/material";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta si es necesario
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta si es necesario
 import API_BASE_URL from "../../%Config/apiConfig"; // URL base para los servicios
 
 const ConsultaReporteMovimientos = () => {
@@ -112,7 +112,7 @@ const ConsultaReporteMovimientos = () => {
             </Button>
 
             {/* Tabla con resultados */}
-            <ReusableTable columns={columns} fetchData={fetchReporteMovimientos} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchReporteMovimientos} />
         </Box>
     );
 };
