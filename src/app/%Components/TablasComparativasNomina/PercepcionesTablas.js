@@ -128,23 +128,17 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
 
 
     const handleSelectAll = (checked) => {
-        const visibleRows = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-        const visibleKeys = new Set(visibleRows.map((row) => `${row.sectpres}-${row.nomina}-${row.id_concepto}`));
-
-        setSelectedRows((prev) => {
-            if (checked) {
-                setIsMassSelection(true); // ✅ Se activa selección masiva
-                return [...prev, ...visibleRows.filter(row =>
-                    !prev.some(r => `${r.sectpres}-${r.nomina}-${r.id_concepto}` === `${row.sectpres}-${row.nomina}-${row.id_concepto}`)
-                )];
-            } else {
-                setIsMassSelection(false); // ✅ Se desactiva si se quitan todas
-                return prev.filter(row =>
-                    !visibleKeys.has(`${row.sectpres}-${row.nomina}-${row.id_concepto}`)
-                );
-            }
-        });
+        if (checked) {
+            // ✅ Selecciona todos los elementos de filteredData (todas las páginas)
+            setSelectedRows(filteredData);
+            setIsMassSelection(true);
+        } else {
+            // ❌ Desmarca todos los elementos
+            setSelectedRows([]);
+            setIsMassSelection(false);
+        }
     };
+
 
 
 
@@ -162,14 +156,15 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
             return;
         }
 
-        // ✅ Agregamos el total solo si se seleccionaron todas las filas
-        const extraData = isMassSelection
+        // ✅ Agrega el total solo si se seleccionaron todas las filas
+        const extraData = selectedRows.length === filteredData.length
             ? { sectpres: "TOTAL", nomina: "", id_concepto: "", nombre_concepto: "TOTAL PERCEPCIONES", percepciones: totalPercepciones }
             : null;
 
         setExtraExportData(extraData);
         setIsExportModalOpen(true);
     };
+
 
 
 
@@ -249,18 +244,11 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                             <TableCell padding="checkbox" className={styles.tableHeaderCheckbox}>
                                 <Checkbox
                                     indeterminate={selectedRows.length > 0 && selectedRows.length < filteredData.length}
-                                    checked={filteredData.length > 0 &&
-                                        filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .every(row => selectedRows.some(selected =>
-                                                `${selected.sectpres}-${selected.nomina}-${selected.id_concepto}` ===
-                                                `${row.sectpres}-${row.nomina}-${row.id_concepto}`
-                                            ))
-                                    }
+                                    checked={selectedRows.length === filteredData.length}
                                     onChange={(e) => handleSelectAll(e.target.checked)}
-                                    sx={{
-
-                                    }}
+                                    sx={{}}
                                 />
+
                             </TableCell>
                             {columns.map((col) => (
                                 <TableCell key={col.accessor} className={styles.tableHeader}>
@@ -314,6 +302,10 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 </Table>
             </TableContainer>
 
+            <div style={{ padding: '1rem', textAlign: "left" }}>
+                <h3>Total Percepciones: {totalPercepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</h3>
+            </div>
+
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 count={filteredData.length}
@@ -323,9 +315,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
             />
 
-            <div style={{ padding: '1rem', textAlign: 'right' }}>
-                <strong>Total Percepciones:</strong> {totalPercepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-            </div>
+
 
             <ExportModal
                 open={isExportModalOpen}

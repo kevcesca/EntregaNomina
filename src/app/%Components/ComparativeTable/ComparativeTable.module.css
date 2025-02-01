@@ -29,8 +29,15 @@
 
 
 .button{
-    color: white;
-    background-color: #9f2241;
+    color: white !important;
+    background-color: #9f2241 !important;
     margin-top: 2rem;
 
 }
+
+.headerRed {
+    color: rgb(255, 255, 255) !important;
+    background-color: #9f2241 !important;
+}
+
+

@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Box, Typography, Alert, Button, Grid, TextField } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable";
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion";
 import API_BASE_URL from "../../%Config/apiConfig";
 
 const ConsultaNominaHistorico = () => {
@@ -104,7 +104,7 @@ const ConsultaNominaHistorico = () => {
             </Button>
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchNominaHistorico} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchNominaHistorico} />
         </Box>
     );
 };

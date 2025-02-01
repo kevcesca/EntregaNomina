@@ -7,6 +7,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Button, TextField, Container, Typography, Box, IconButton, InputAdornment, ThemeProvider } from '@mui/material';
+import AsyncButton from '../../%Components/AsyncButton/AsyncButton';
 import styles from './Login.module.css';
 import theme from '../../$tema/theme';
 import { API_USERS_URL } from '../../%Config/apiConfig';
@@ -17,6 +18,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [intentosFallidos, setIntentosFallidos] = useState(0);
     const router = useRouter();
     const { setUser, checkPasswordForEmployee } = useAuth();
 
@@ -42,9 +44,19 @@ const Login = () => {
                 credentials: 'include',
             });
 
-            // Manejar errores de autenticación genéricamente
             if (!response.ok) {
-                setError('Usuario y/o contraseña inválido'); // Mensaje genérico
+                const errorMessage = await response.text();
+                if (errorMessage.includes('excedido el número de intentos')) {
+                    setError(errorMessage); // Mostrar mensaje específico
+                } else {
+                    // Incrementar el contador de intentos fallidos solo si la respuesta no es exitosa
+                    setIntentosFallidos(intentosFallidos + 1);
+                    if (intentosFallidos + 1 >= 3) {
+                        setError('Ingresaste incorrectamente el correo electrónico o contraseña 3 veces. Por favor, contacta al administrador del sistema si no recuerdas tu contraseña.'); // Mensaje genérico
+                    } else {
+                        setError('Usuario y/o contraseña inválido'); // Mensaje genérico
+                    }
+                }
                 return;
             }
 
@@ -58,7 +70,8 @@ const Login = () => {
             if (isPasswordCorrect) {
                 router.push('/NuevaContrasena');
             } else {
-                setError('Usuario y/o contraseña inválido'); // Mensaje genérico
+                // Si la contraseña es correcta, pero hay un error, manejarlo
+                setError('Ocurrió un error al verificar la contraseña. Por favor, intente nuevamente.');
             }
         } catch (err) {
             console.error('Login error:', err);
@@ -67,6 +80,7 @@ const Login = () => {
             setIsLoading(false);
         }
     };
+
 
     const toggleShowPassword = () => {
         setShowPassword((prev) => !prev);

@@ -42,21 +42,33 @@ const ExportModal = ({ open, onClose, selectedRows, columns, extraData }) => {
 
   const handleExport = () => {
     if (selectedColumns.length === 0) {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Advertencia",
-        detail: "Selecciona al menos una columna para exportar.",
-        life: 3000,
-      });
-      return;
+        toastRef.current.show({
+            severity: "warn",
+            summary: "Advertencia",
+            detail: "Selecciona al menos una columna para exportar.",
+            life: 3000,
+        });
+        return;
     }
 
-    let exportData = [...selectedRows];
+    // ✅ Filtramos cualquier `null` o `undefined` antes de exportar
+    let exportData = selectedRows.filter(row => row !== null && row !== undefined);
 
-// ✅ Agregar solo si `extraData` tiene valores
-if (extraData !== null) {
-    exportData.push(extraData);
-}
+    // ✅ Agregamos `extraData` solo si es un objeto válido
+    if (extraData && typeof extraData === "object") {
+        exportData.push(extraData);
+    }
+
+    // ✅ Verificamos que exportData no esté vacío
+    if (exportData.length === 0) {
+        toastRef.current.show({
+            severity: "warn",
+            summary: "Advertencia",
+            detail: "No hay datos válidos para exportar.",
+            life: 3000,
+        });
+        return;
+    }
 
 
 
@@ -93,20 +105,20 @@ if (extraData !== null) {
     }
     else if (exportFormat === "excel") {
       const worksheetData = [
-          selectedColumns.map(
-              (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
-          ),
-          ...exportData.map((row) =>
-              selectedColumns.map((accessor) => row[accessor] || "-")
-          ),
+        selectedColumns.map(
+          (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
+        ),
+        ...exportData.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
+        ),
       ];
 
       const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
       XLSX.writeFile(workbook, "exportacion.xlsx");
-  }
-else if (exportFormat === "csv") {
+    }
+    else if (exportFormat === "csv") {
       const csvData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
@@ -153,15 +165,17 @@ else if (exportFormat === "csv") {
         open={open}
         onClose={onClose}
         fullWidth
-        maxWidth="lg"
+        maxWidth="xl" // ✅ Más ancho para evitar scroll horizontal
         sx={{
           "& .MuiDialog-paper": {
-            height: "80vh",
-            maxWidth: "90%",
+            maxHeight: "90vh", // ✅ Más alto para que se vea más contenido
+            minWidth: "95%", // ✅ Evita recortes laterales
             padding: "16px",
+            overflow: "visible"
           },
         }}
       >
+
         <DialogTitle>Exportar Datos</DialogTitle>
         <DialogContent
           className={styles.dialogContent}
@@ -200,17 +214,21 @@ else if (exportFormat === "csv") {
           <TableContainer
             sx={{
               flex: 2,
-              maxHeight: "70vh",
-              overflowY: "auto",
+              maxHeight: "70vh", // ✅ Se mantiene la altura máxima con scroll vertical
+              overflowY: "auto", // ✅ Solo scroll vertical
+              overflowX: "hidden", // ✅ Se elimina el scroll horizontal
               border: "1px solid #ccc",
               borderRadius: "8px",
               padding: "0.5rem",
+              width: "100%", // ✅ Ocupar todo el ancho disponible
+              display: "block" // ✅ Asegurar que la tabla no se desborde
             }}
           >
+
             <Typography variant="h6" sx={{ marginBottom: "1rem", textAlign: "center", color: "#9b1d1d" }}>
               Vista Previa
             </Typography>
-            <Table>
+            <Table sx={{ width: "100%", tableLayout: "fixed" }}>
               <TableHead>
                 <TableRow>
                   {selectedColumns.map((accessor) => (
@@ -221,7 +239,9 @@ else if (exportFormat === "csv") {
                         color: "white",
                         fontWeight: "bold",
                         textAlign: "center",
-                        whiteSpace: "nowrap",
+                        wordWrap: "break-word", // ✅ Permite que el texto se ajuste sin expandir la tabla
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
                       }}
                     >
                       {columns.find((col) => col.accessor === accessor)?.label || accessor}
@@ -231,24 +251,24 @@ else if (exportFormat === "csv") {
               </TableHead>
 
               <TableBody>
-    {selectedRows.map((row, index) => (
-        <TableRow key={index}>
-            {selectedColumns.map((accessor) => (
-                <TableCell key={accessor}>{row[accessor] || "-"}</TableCell>
-            ))}
-        </TableRow>
-    ))}
+                {selectedRows.map((row, index) => (
+                  <TableRow key={index}>
+                    {selectedColumns.map((accessor) => (
+                      <TableCell key={accessor}>{row[accessor] || "-"}</TableCell>
+                    ))}
+                  </TableRow>
+                ))}
 
-    {extraData && (
-        <TableRow>
-            {selectedColumns.map((accessor) => (
-                <TableCell key={accessor} sx={{ fontWeight: "bold" }}>
-                    {extraData[accessor] || "-"}
-                </TableCell>
-            ))}
-        </TableRow>
-    )}
-</TableBody>
+                {extraData && (
+                  <TableRow>
+                    {selectedColumns.map((accessor) => (
+                      <TableCell key={accessor} sx={{ fontWeight: "bold" }}>
+                        {extraData[accessor] || "-"}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )}
+              </TableBody>
 
             </Table>
           </TableContainer>

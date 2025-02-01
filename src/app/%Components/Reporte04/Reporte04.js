@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Typography, Grid, TextField, Button, Alert } from "@mui/material";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL from "../../%Config/apiConfig"; // URL base para los servicios
 
 const ConsultaCLCQuincenaTotales = () => {
@@ -46,7 +46,7 @@ const ConsultaCLCQuincenaTotales = () => {
 
             const data = await response.json();
             console.log("Datos recibidos del servicio:", data); // Log para verificar datos
-            return data; // Retorna los datos para que el componente `ReusableTable` los procese
+            return data; // Retorna los datos para que el componente `ReusableTableSeleccion` los procese
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             setError("No se pudo cargar la información. Por favor, intenta nuevamente.");
@@ -107,7 +107,7 @@ const ConsultaCLCQuincenaTotales = () => {
             </Grid>
 
             {/* Tabla de resultados */}
-            <ReusableTable
+            <ReusableTableSeleccion
                 columns={columns}
                 fetchData={fetchCLCQuincenaTotales} // Pasa la función como prop
             />

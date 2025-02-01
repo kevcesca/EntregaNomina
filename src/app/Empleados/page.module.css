@@ -43,3 +43,7 @@
     font-size: 2rem;
     margin-bottom: 20px;
 }
+
+.red-header .MuiDataGrid-columnHeaderTitle {
+    color: red !important;  /* Cambia el color del texto de los encabezados */
+}

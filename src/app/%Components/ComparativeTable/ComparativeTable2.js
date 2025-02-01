@@ -163,56 +163,22 @@ const ComparativaTableSuperAdmin = ({ userRevision, quincena, anio }) => {
     return (
         <div>
             <Toast ref={toast} />
-            <Toolbar
-                className="mb-4"
-                right={() => (
-                    <div className="flex align-items-center justify-content-end gap-2">
-                        <AsyncButton
-                            type="button"
-                            icon="pi pi-file"
-                            rounded
-                            onClick={exportCSV}
-                            data-pr-tooltip="CSV"
-                        >
-                            Exportar CSV
-                        </AsyncButton>
-                        <AsyncButton
-                            type="button"
-                            icon="pi pi-file-excel"
-                            severity="success"
-                            rounded
-                            onClick={exportExcel}
-                            data-pr-tooltip="XLS"
-                        >
-                            Exportar Excel
-                        </AsyncButton>
-                        <AsyncButton
-                            type="button"
-                            icon="pi pi-file-pdf"
-                            severity="warning"
-                            rounded
-                            onClick={exportPdf}
-                            data-pr-tooltip="PDF"
-                        >
-                            Exportar PDF
-                        </AsyncButton>
-                    </div>
-                )}
-            />
+           
             {loading ? (
                 <p>Cargando...</p>
             ) : (
                 <DataTable ref={dt} value={records} responsiveLayout="scroll">
-                    <Column field="idx" header="Idx" sortable />
-                    <Column field="anio" header="Año" sortable />
-                    <Column field="quincena" header="Quincena" sortable />
-                    <Column field="nombre_nomina" header="Nombre Nómina" sortable />
-                    <Column field="nombre_archivo" header="Nombre Archivo" sortable />
-                    <Column field="fecha_carga" header="Fecha Carga" sortable />
-                    <Column field="user_carga" header="Usuario Carga" sortable />
-                    <Column body={approveTemplate} header="Acción" />
+                    <Column field="idx" header="Idx" headerClassName={styles.headerRed} />
+                    <Column field="anio" header="Año" headerClassName={styles.headerRed} />
+                    <Column field="quincena" header="Quincena" headerClassName={styles.headerRed}e />
+                    <Column field="nombre_nomina" header="Nombre Nómina" headerClassName={styles.headerRed} />
+                    <Column field="nombre_archivo" header="Nombre Archivo" headerClassName={styles.headerRed} />
+                    <Column field="fecha_carga" header="Fecha Carga" headerClassName={styles.headerRed} />
+                    <Column field="user_carga" header="Usuario Carga" headerClassName={styles.headerRed} />
+                    <Column body={approveTemplate} header="Acción" headerClassName={styles.headerRed}/>
                 </DataTable>
             )}
+            <br></br>
             <AsyncButton
                 className={styles.button}
                 label="Confirmar"
