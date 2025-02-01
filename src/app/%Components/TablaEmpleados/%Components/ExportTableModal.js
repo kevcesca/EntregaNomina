@@ -171,7 +171,13 @@ const ExportTableModal = ({ open, onClose, rows, columns }) => {
                         <TableHead>
                             <TableRow>
                                 {selectedColumns.map(field => (
-                                    <TableCell key={field} sx={{ backgroundColor: '#9b1d1d', color: 'white', fontWeight: 'bold' }}>
+                                    <TableCell key={field}
+                                     sx={{ 
+                                        backgroundColor: '#9b1d1d', 
+                                        color: 'white', 
+                                        fontWeight: 'bold' ,
+                                        textAlign: "center",
+                                        whiteSpace: "nowrap"}}>
                                         {columns.find(col => col.field === field)?.headerName || field}
                                     </TableCell>
                                 ))}
@@ -181,7 +187,14 @@ const ExportTableModal = ({ open, onClose, rows, columns }) => {
                             {rows.map((row, index) => (
                                 <TableRow key={index}>
                                     {selectedColumns.map(field => (
-                                        <TableCell key={field}>{row[field]}</TableCell>
+                                        <TableCell key={field}
+                                        sx={{
+                                            textAlign: "left",
+                                            whiteSpace: "normal",
+                                            wordBreak: "break-word",
+                                            maxWidth: "150px", // Ajusta según tus necesidades
+                                        }}
+                                        >{row[field]}</TableCell>
                                     ))}
                                 </TableRow>
                             ))}
@@ -214,3 +227,6 @@ ExportTableModal.propTypes = {
 };
 
 export default ExportTableModal;
+
+
+
