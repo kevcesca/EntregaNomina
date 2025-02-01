@@ -49,7 +49,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: { anio, quincena, tipo: 'Extraordinarios' },
             });
-    
+
             const data = response.data
                 .filter(
                     (item) =>
@@ -67,12 +67,11 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     aprobado: item.aprobado,
                     aprobado2: item.aprobado2,
                 }));
-    
+
             setExtraordinarios(data);
-    
             setIsUploadDisabled(data.length >= 2);
-            setCanProcess(data.length >= 2);
-            setIsProcessed(data.some((archivo) => archivo.aprobado && archivo.aprobado2)); // Aquí
+            setCanProcess(data.length === 2); // ✅ Solo permite procesar si hay exactamente 2 archivos
+            setIsProcessed(data.some((archivo) => archivo.aprobado && archivo.aprobado2));
         } catch (error) {
             toast.current.show({
                 severity: 'error',
@@ -82,25 +81,35 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             });
         }
     };
-    
+
+
+
+
 
     const handleFileSelection = (event) => {
         const selectedFiles = Array.from(event.target.files);
-        if (selectedFiles.length !== 2) {
+
+        // 🔥 Si ya hay archivos subidos, permite subir solo los faltantes hasta completar 2
+        if (extraordinarios.length + selectedFiles.length > 2) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
-                detail: 'Debes seleccionar exactamente 2 archivos.',
+                detail: 'Solo puedes subir hasta 2 archivos.',
                 life: 3000,
             });
             return;
         }
-        setFilesToUpload(selectedFiles);
+
+        setFilesToUpload((prevFiles) => [...prevFiles, ...selectedFiles]); // ✅ Permite agregar archivos en varias selecciones
         setIsUploadDialogOpen(true);
+
+        event.target.value = null; // 🔄 Reset input para evitar problemas al seleccionar los mismos archivos
     };
 
+
+
     const handleFileUpload = async () => {
-        if (!filesToUpload.length || !selectedTipo) {
+        if (filesToUpload.length === 0 || !selectedTipo) {
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
@@ -138,7 +147,8 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 life: 3000,
             });
 
-            await fetchExtraordinariosData(); // Refrescar datos tras la subida
+            await fetchExtraordinariosData(); // 🔄 Refrescar lista después de la subida
+
         } catch (error) {
             toast.current.show({
                 severity: 'error',
@@ -147,54 +157,65 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 life: 5000,
             });
         } finally {
-            setFilesToUpload([]); // Limpiar selección de archivos
-            setSelectedTipo(''); // Reiniciar tipo extraordinario seleccionado
+            setFilesToUpload([]); // ✅ Limpia la lista de archivos
             setIsLoading(false);
         }
     };
 
+
+
+    const handleConfirmUpload = async () => {
+        setIsUploadDialogOpen(false); // 🔥 Cierra el modal
+        setFilesToUpload([]); // 🔥 Limpia la lista de archivos seleccionados para evitar duplicados
+    };
+
+
     const handleDeleteFile = async () => {
-        if (!fileToDelete || !fileToDelete.idx) {
-            toast.current.show({
-                severity: 'warn',
-                summary: 'Advertencia',
-                detail: 'No se encontró un identificador válido para el archivo.',
-                life: 3000,
-            });
-            return;
-        }
+        if (!fileToDelete || !fileToDelete.idx) return;
 
         setIsLoading(true);
 
         try {
-            const deleteURL = `${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`;
-            const response = await axios.get(deleteURL);
+            await axios.get(`${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`);
 
-            if (response.status === 200 && response.data.includes('eliminado correctamente')) {
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Archivo eliminado correctamente.',
-                    life: 3000,
-                });
+            toast.current.show({
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Archivo eliminado correctamente.',
+                life: 3000,
+            });
 
-                setFileToDelete(null);
-                setIsDeleteDialogOpen(false);
-                await fetchExtraordinariosData(); // Refrescar datos tras la eliminación
-            } else {
-                throw new Error(response.data || 'No se pudo eliminar el archivo.');
-            }
+            setExtraordinarios((prev) => {
+                const updatedFiles = prev.filter((file) => file.idx !== fileToDelete.idx);
+                setIsUploadDisabled(updatedFiles.length >= 2);
+                setCanProcess(updatedFiles.length === 2);
+
+                // 🔥 Si ya no hay archivos, resetear el select
+                if (updatedFiles.length === 0) {
+                    setSelectedTipo('');
+                }
+
+                return updatedFiles;
+            });
+
+            setIsDeleteDialogOpen(false);
+            setFileToDelete(null);
+
         } catch (error) {
             toast.current.show({
                 severity: 'error',
-                summary: 'Error al eliminar',
-                detail: 'Hubo un problema al intentar eliminar el archivo.',
+                summary: 'Error',
+                detail: 'No se pudo eliminar el archivo.',
                 life: 5000,
             });
         } finally {
             setIsLoading(false);
         }
     };
+
+
+
+
 
     const handleFileDownload = async (archivoNombre, tipoExtraordinario) => {
         const nombreSinExtension = archivoNombre.replace(/\.[^/.]+$/, '');
@@ -237,18 +258,25 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
 
     const handleProcesarNomina = async () => {
         setIsLoading(true);
-    
+
         try {
+            // 🔥 Obtener el tipo extraordinario desde los archivos subidos
+            const tipoExtraordinario = extraordinarios.length > 0 ? extraordinarios[0].tipoExtraordinario : '';
+
+            if (!tipoExtraordinario) {
+                throw new Error('No se encontró un tipo extraordinario válido para procesar.');
+            }
+
             const response = await axios.get(`${API_BASE_URL}/SubirNomina/dataBase`, {
                 params: {
                     quincena,
                     anio,
                     tipo: 'Extraordinarios',
                     usuario: session || 'unknown',
-                    extra: selectedTipo,
+                    extra: tipoExtraordinario, // ✅ Ahora envía el tipo correcto
                 },
             });
-    
+
             if (response.status === 200) {
                 toast.current.show({
                     severity: 'success',
@@ -256,15 +284,15 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                     detail: 'Nómina extraordinaria procesada correctamente.',
                     life: 3000,
                 });
-    
+
                 setExtraordinarios((prev) =>
                     prev.map((archivo) => ({
                         ...archivo,
-                        aprobado: false, // Aquí
+                        aprobado: false,
                         aprobado2: false,
                     }))
                 );
-                setIsProcessed(true); // Aquí
+                setIsProcessed(true);
             } else {
                 throw new Error('Error al procesar la nómina extraordinaria.');
             }
@@ -272,14 +300,15 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             toast.current.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: 'Error al procesar la nómina extraordinaria.',
+                detail: error.message || 'Error al procesar la nómina extraordinaria.',
                 life: 5000,
             });
         } finally {
             setIsLoading(false);
         }
     };
-    
+
+
 
     const descargaTemplate = (rowData) => (
         <button
@@ -291,13 +320,12 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             <i className="pi pi-download"></i>
         </button>
     );
-    
+
 
     const deleteTemplate = (rowData) => (
         <button
-            className={`${styles.deleteButton} ${
-                rowData.aprobado && rowData.aprobado2 ? styles.disabledButton : ''
-            }`}
+            className={`${styles.deleteButton} ${rowData.aprobado && rowData.aprobado2 ? styles.disabledButton : ''
+                }`}
             onClick={() => {
                 setFileToDelete(rowData);
                 setIsDeleteDialogOpen(true);
@@ -308,7 +336,7 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
             <i className="pi pi-times"></i>
         </button>
     );
-    
+
 
     return (
         <div className={`card ${styles.card}`}>
@@ -352,18 +380,22 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                         <input type="file" hidden onChange={handleFileSelection} accept=".xlsx" multiple />
                     </Button>
 
-                    {canProcess && (
+                    {canProcess && !isProcessed && (
                         <AsyncButton>
-                            <Button
-                                variant="contained"
-                                className={styles.procesarButton}
-                                onClick={handleProcesarNomina}
-                            >
-                                Procesar Nómina Extraordinaria
-                            </Button>
+                            <div> {/* ✅ Se usa un <div> para evitar error de anidación */}
+                                <Button
+                                    variant="contained"
+                                    className={styles.procesarButton}
+                                    onClick={handleProcesarNomina}
+                                >
+                                    Procesar Nómina Extraordinaria
+                                </Button>
+                            </div>
                         </AsyncButton>
                     )}
+
                 </div>
+
             </LoadingOverlay>
 
             <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
@@ -376,22 +408,29 @@ export default function TablaQuincenasExtraordinarias({ quincena, anio, session 
                 </DialogActions>
             </Dialog>
 
-            <Dialog open={isUploadDialogOpen} onClose={() => setIsUploadDialogOpen(false)}>
+            <Dialog open={isUploadDialogOpen} onClose={() => {
+                setIsUploadDialogOpen(false);
+                setFilesToUpload([]); // 🔥 Limpia archivos cuando se cierra sin subir
+            }}>
                 <DialogTitle>¿Desea subir estos archivos?</DialogTitle>
                 <div style={{ padding: '1rem' }}>
                     <ul>
-                        {filesToUpload.map((file, index) => (
-                            <li key={index}>{file.name}</li>
-                        ))}
+                        {filesToUpload.length > 0 ? (
+                            filesToUpload.map((file, index) => <li key={index}>{file.name}</li>)
+                        ) : (
+                            <p>No hay archivos seleccionados</p>
+                        )}
                     </ul>
                 </div>
                 <DialogActions>
-                    <Button onClick={() => setIsUploadDialogOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleFileUpload} color="primary">
-                        Subir
-                    </Button>
+                    <Button onClick={() => {
+                        setIsUploadDialogOpen(false);
+                        setFilesToUpload([]); // 🔥 También limpia al cancelar
+                    }}>Cancelar</Button>
+                    <Button onClick={handleFileUpload} color="primary">Subir</Button>
                 </DialogActions>
             </Dialog>
+
         </div>
     );
 }

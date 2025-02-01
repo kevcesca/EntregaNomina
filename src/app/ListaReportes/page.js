@@ -2,12 +2,6 @@
 
 import React, { useState } from 'react';
 import { Alert } from '@mui/material'; // Importar Alert de Material-UI
-import ReporteTipoPago from "../%Components/ReporteTipoPago/ReporteTipoPago";
-import ReporteAltaBajas from "../%Components/ReporteAltasBajas/ReporteAltasBajas";
-import ReporteNominaNumCuenta from "../%Components/ReporteNominaNumCuenta/ReporteNominaNumCuenta";
-import ReporteDiferenciasLiquidoConLpad from "../%Components/ReporteDiferenciasLiquidoConLpad/ReporteDiferenciasLiquidoConLpad";
-import ReporteAbonoPorConceptoMovimientoQuincenas from "../%Components/ReporteAbonoPorConceptoMovimientoQuincenas/ReporteAbonoPorConceptoMovimientoQuincenas";
-import Reporte04 from "../%Components/Reporte04/Reporte04";
 import HeaderSeccion from "../%Components/HeaderSeccion/HeaderSeccion";
 import ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido from "../%Components/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido/ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido";
 import ReporteDeNominaCuentaPorLiquidarPagoPorCheque from "../%Components/ReporteDeNominaCuentaPorLiquidarPagoPorCheque/ReporteDeNominaCuentaPorLiquidarPagoPorCheque";
@@ -15,8 +9,6 @@ import ReporteDeNominasExtraordinarias from "../%Components/ReporteDeNominasExtr
 import ReporteEmisionDeCheques from "../%Components/ReporteEmisionDeCheques/ReporteEmisionDeCheques";
 import ReporteDeAltas from "../%Components/ReporteDeAltas/ReporteDeAltas";
 import ReporteSaldoDiarioEnBanco from "../%Components/ReporteSaldoDiarioEnBanco/ReporteSaldoDiarioEnBanco";
-import ReporteDeHonorariosPorFecha from "../%Components/ReporteDeHonorariosPorFecha/ReporteDeHonorariosPorFecha";
-import ReporteDeMovimientoPorQuincena from "../%Components/ReporteDeMovimientoPorQuincena/ReporteDeMovimientoPorQuincena";
 
 export default function Page() {
     const [showTipoPago, setShowTipoPago] = useState(false);
@@ -41,54 +33,7 @@ export default function Page() {
                 Presiona un click encima de la sección que deseas verificar .
             </Alert>
 
-            {/* Encabezado y ReporteTipoPago */}
-            <HeaderSeccion
-                titulo="Reporte: Tipo de Pago"
-                isOpen={showTipoPago}
-                onToggle={() => setShowTipoPago(!showTipoPago)}
-            />
-            {showTipoPago && <ReporteTipoPago />}
-
-            {/* Encabezado y ReporteAltaBajas */}
-            <HeaderSeccion
-                titulo="Reporte: Altas y Bajas"
-                isOpen={showAltaBajas}
-                onToggle={() => setShowAltaBajas(!showAltaBajas)}
-            />
-            {showAltaBajas && <ReporteAltaBajas />}
-
-            {/* Encabezado y ReporteNominaNumCuenta */}
-            <HeaderSeccion
-                titulo="Reporte: Números de Cuenta en Nómina"
-                isOpen={showNominaNumCuenta}
-                onToggle={() => setShowNominaNumCuenta(!showNominaNumCuenta)}
-            />
-            {showNominaNumCuenta && <ReporteNominaNumCuenta />}
-
-            {/* Encabezado y ReporteDiferenciasLiquidoConLpad */}
-            <HeaderSeccion
-                titulo="Reporte: Diferencias de Líquido con Lpad"
-                isOpen={showDiferenciasLiquido}
-                onToggle={() => setShowDiferenciasLiquido(!showDiferenciasLiquido)}
-            />
-            {showDiferenciasLiquido && <ReporteDiferenciasLiquidoConLpad />}
-
-            {/* Encabezado y ReporteAbonoPorConceptoMovimientoQuincenas */}
-            <HeaderSeccion
-                titulo="Reporte: Abono por Concepto y Movimiento por Quincenas"
-                isOpen={showAbonoConcepto}
-                onToggle={() => setShowAbonoConcepto(!showAbonoConcepto)}
-            />
-            {showAbonoConcepto && <ReporteAbonoPorConceptoMovimientoQuincenas />}
-
-            {/* Encabezado y Reporte04 */}
-            <HeaderSeccion
-                titulo="Reporte: 04"
-                isOpen={showReporte04}
-                onToggle={() => setShowReporte04(!showReporte04)}
-            />
-            {showReporte04 && <Reporte04 />}
-
+            {/* Se queda el reporte de historico de nómina */}
             <HeaderSeccion
                 titulo="Reporte: Nómina Histórico por Monto, Tipo de Nómina y Ejercido"
                 isOpen={showHistorico}
@@ -96,6 +41,7 @@ export default function Page() {
             />
             {showHistorico && <ReporteNominaHistoricoPorMontoTipoDeNominaYEjercido />}
 
+            {/* Se queda el reporte de cuenta de nómina por liquidar pago por cheque */}
             <HeaderSeccion
                 titulo="Reporte: Nómina Cuenta por Liquidar Pago por Cheque"
                 isOpen={showCuentaCheque}
@@ -103,6 +49,7 @@ export default function Page() {
             />
             {showCuentaCheque && <ReporteDeNominaCuentaPorLiquidarPagoPorCheque />}
 
+            {/* Se queda el reporte de nóminas extraordinarias */}
             <HeaderSeccion
                 titulo="Reporte: Nóminas Extraordinarias"
                 isOpen={showNominasExtraordinarias}
@@ -110,6 +57,7 @@ export default function Page() {
             />
             {showNominasExtraordinarias && <ReporteDeNominasExtraordinarias />}
 
+            {/* Se queda el reporte de emisión de cheques */}
             <HeaderSeccion
                 titulo="Reporte: Emisión de Cheques"
                 isOpen={showEmisionCheques}
@@ -117,6 +65,7 @@ export default function Page() {
             />
             {showEmisionCheques && <ReporteEmisionDeCheques />}
 
+            {/* Se queda el reporte de altas de empleados */}
             <HeaderSeccion
                 titulo="Reporte: Altas de Empleados"
                 isOpen={showAltas}
@@ -124,26 +73,13 @@ export default function Page() {
             />
             {showAltas && <ReporteDeAltas />}
 
+            {/* Se queda el reporte de saldos diarios en banco */}
             <HeaderSeccion
                 titulo="Reporte: Saldos Diarios en Banco"
                 isOpen={showSaldoDiario}
                 onToggle={() => setShowSaldoDiario(!showSaldoDiario)}
             />
             {showSaldoDiario && <ReporteSaldoDiarioEnBanco />}
-
-            <HeaderSeccion
-                titulo="Reporte: Honorarios por Fecha"
-                isOpen={showHonorarios}
-                onToggle={() => setShowHonorarios(!showHonorarios)}
-            />
-            {showHonorarios && <ReporteDeHonorariosPorFecha />}
-
-            <HeaderSeccion
-                titulo="Reporte: Movimientos por Quincena"
-                isOpen={showMovimientoQuincena}
-                onToggle={() => setShowMovimientoQuincena(!showMovimientoQuincena)}
-            />
-            {showMovimientoQuincena && <ReporteDeMovimientoPorQuincena />}
         </div>
     );
 }

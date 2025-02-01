@@ -28,10 +28,11 @@ import { Toast } from "primereact/toast";
 import styles from "../ReusableTableDepositoResumen.module.css";
 import theme from "../../../$tema/theme";
 
-const ExportModal = ({ open, onClose, selectedRows, columns }) => {
+const ExportModal = ({ open, onClose, selectedRows, columns, extraData }) => {
   const [selectedColumns, setSelectedColumns] = useState(columns.map((col) => col.accessor));
   const [exportFormat, setExportFormat] = useState("");
   const toastRef = useRef(null); // Toast para mensajes
+
 
   const handleColumnToggle = (accessor) => {
     setSelectedColumns((prev) =>
@@ -41,18 +42,39 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
 
   const handleExport = () => {
     if (selectedColumns.length === 0) {
-      toastRef.current.show({
-        severity: "warn",
-        summary: "Advertencia",
-        detail: "Selecciona al menos una columna para exportar.",
-        life: 3000,
-      });
-      return;
+        toastRef.current.show({
+            severity: "warn",
+            summary: "Advertencia",
+            detail: "Selecciona al menos una columna para exportar.",
+            life: 3000,
+        });
+        return;
     }
+
+    // ✅ Filtramos cualquier `null` o `undefined` antes de exportar
+    let exportData = selectedRows.filter(row => row !== null && row !== undefined);
+
+    // ✅ Agregamos `extraData` solo si es un objeto válido
+    if (extraData && typeof extraData === "object") {
+        exportData.push(extraData);
+    }
+
+    // ✅ Verificamos que exportData no esté vacío
+    if (exportData.length === 0) {
+        toastRef.current.show({
+            severity: "warn",
+            summary: "Advertencia",
+            detail: "No hay datos válidos para exportar.",
+            life: 3000,
+        });
+        return;
+    }
+
+
 
     if (exportFormat === "pdf") {
       const doc = new jsPDF({
-        orientation: "landscape", // Orientación horizontal
+        orientation: "landscape",
         unit: "mm",
         format: "a4",
       });
@@ -60,77 +82,34 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       doc.setFontSize(16);
       doc.text("Exportación de Datos", 14, 15);
 
-      // Columnas seleccionadas (encabezados de la tabla)
       const tableColumnHeaders = selectedColumns.map(
-        (accessor) =>
-          columns.find((col) => col.accessor === accessor)?.label || accessor
+        (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
       );
 
-      // Filas seleccionadas con formato
-      const tableRows = selectedRows.map((row) =>
-        selectedColumns.map((accessor) => {
-          if (
-            accessor === "PERCEPCIONES" ||
-            accessor === "DEDUCCIONES" ||
-            accessor === "LIQUIDO"
-          ) {
-            return row[accessor]?.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            }) || "-";
-          }
-          return row[accessor] || "-";
-        })
+      const tableRows = exportData.map((row) =>
+        selectedColumns.map((accessor) => row[accessor] || "-")
       );
 
-      // Configuración de la tabla en PDF
       doc.autoTable({
         head: [tableColumnHeaders],
         body: tableRows,
         startY: 25,
-        styles: {
-          halign: "center", // Centrar texto
-          fontSize: 9, // Tamaño de fuente
-          cellPadding: 3, // Espaciado interno de las celdas
-        },
-        columnStyles: {
-          // Se elimina el ancho fijo para permitir un ajuste automático
-        },
-        headStyles: {
-          fillColor: [155, 29, 29], // Color del encabezado
-          textColor: [255, 255, 255], // Texto blanco en el encabezado
-          fontSize: 11,
-          halign: "center",
-        },
-        bodyStyles: {
-          valign: "middle", // Centrar verticalmente
-          halign: "center", // Alinear el texto al centro
-          overflow: "linebreak", // Saltos de línea automáticos
-        },
+        styles: { halign: "center", fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [155, 29, 29], textColor: [255, 255, 255], fontSize: 11 },
+        bodyStyles: { valign: "middle", halign: "center", overflow: "linebreak" },
         margin: { top: 25 },
-        tableWidth: "auto", // Ajusta automáticamente el ancho de la tabla
+        tableWidth: "auto",
       });
 
       doc.save("exportacion.pdf");
-    } else if (exportFormat === "excel") {
+    }
+    else if (exportFormat === "excel") {
       const worksheetData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
         ),
-        ...selectedRows.map((row) =>
-          selectedColumns.map((accessor) => {
-            if (
-              accessor === "PERCEPCIONES" ||
-              accessor === "DEDUCCIONES" ||
-              accessor === "LIQUIDO"
-            ) {
-              return row[accessor]?.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-              }) || "-";
-            }
-            return row[accessor] || "-";
-          })
+        ...exportData.map((row) =>
+          selectedColumns.map((accessor) => row[accessor] || "-")
         ),
       ];
 
@@ -138,7 +117,8 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Datos");
       XLSX.writeFile(workbook, "exportacion.xlsx");
-    } else if (exportFormat === "csv") {
+    }
+    else if (exportFormat === "csv") {
       const csvData = [
         selectedColumns.map(
           (accessor) => columns.find((col) => col.accessor === accessor)?.label || accessor
@@ -185,15 +165,17 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
         open={open}
         onClose={onClose}
         fullWidth
-        maxWidth="lg"
+        maxWidth="xl" // ✅ Más ancho para evitar scroll horizontal
         sx={{
           "& .MuiDialog-paper": {
-            height: "80vh",
-            maxWidth: "90%",
+            maxHeight: "90vh", // ✅ Más alto para que se vea más contenido
+            minWidth: "95%", // ✅ Evita recortes laterales
             padding: "16px",
+            overflow: "visible"
           },
         }}
       >
+
         <DialogTitle>Exportar Datos</DialogTitle>
         <DialogContent
           className={styles.dialogContent}
@@ -232,17 +214,21 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
           <TableContainer
             sx={{
               flex: 2,
-              maxHeight: "70vh",
-              overflowY: "auto",
+              maxHeight: "70vh", // ✅ Se mantiene la altura máxima con scroll vertical
+              overflowY: "auto", // ✅ Solo scroll vertical
+              overflowX: "hidden", // ✅ Se elimina el scroll horizontal
               border: "1px solid #ccc",
               borderRadius: "8px",
               padding: "0.5rem",
+              width: "100%", // ✅ Ocupar todo el ancho disponible
+              display: "block" // ✅ Asegurar que la tabla no se desborde
             }}
           >
+
             <Typography variant="h6" sx={{ marginBottom: "1rem", textAlign: "center", color: "#9b1d1d" }}>
               Vista Previa
             </Typography>
-            <Table>
+            <Table sx={{ width: "100%", tableLayout: "fixed" }}>
               <TableHead>
                 <TableRow>
                   {selectedColumns.map((accessor) => (
@@ -253,7 +239,9 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
                         color: "white",
                         fontWeight: "bold",
                         textAlign: "center",
-                        whiteSpace: "nowrap",
+                        wordWrap: "break-word", // ✅ Permite que el texto se ajuste sin expandir la tabla
+                        overflow: "hidden",
+                        textOverflow: "ellipsis"
                       }}
                     >
                       {columns.find((col) => col.accessor === accessor)?.label || accessor}
@@ -263,32 +251,25 @@ const ExportModal = ({ open, onClose, selectedRows, columns }) => {
               </TableHead>
 
               <TableBody>
-                {selectedRows.length > 0 ? (
-                  selectedRows.map((row, index) => (
-                    <TableRow key={index}>
-                      {selectedColumns.map((accessor) => (
-                        <TableCell
-                          key={accessor}
-                          sx={{
-                            textAlign: "left",
-                            whiteSpace: "normal",
-                            wordBreak: "break-word",
-                            padding: "0.5rem",
-                          }}
-                        >
-                          {row[accessor] || "Sin contenido"}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
-                ) : (
+                {selectedRows.map((row, index) => (
+                  <TableRow key={index}>
+                    {selectedColumns.map((accessor) => (
+                      <TableCell key={accessor}>{row[accessor] || "-"}</TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+
+                {extraData && (
                   <TableRow>
-                    <TableCell colSpan={selectedColumns.length} sx={{ textAlign: "center", padding: "1rem" }}>
-                      No hay datos seleccionados para exportar.
-                    </TableCell>
+                    {selectedColumns.map((accessor) => (
+                      <TableCell key={accessor} sx={{ fontWeight: "bold" }}>
+                        {extraData[accessor] || "-"}
+                      </TableCell>
+                    ))}
                   </TableRow>
                 )}
               </TableBody>
+
             </Table>
           </TableContainer>
         </DialogContent>

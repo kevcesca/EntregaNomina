@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Checkbox, IconButton, Tooltip, TextField, Button, TablePagination } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import { Checkbox, TextField, TablePagination } from '@mui/material';
 import styles from './CrudRoles.module.css';
+import RoleRow from './RoleRow'; // Importamos el componente externo de RoleRow
 
 const RolesTable = ({
     roles,
@@ -24,11 +24,21 @@ const RolesTable = ({
     };
 
     // Filtrar roles según el término de búsqueda
-    const filteredRoles = roles.filter(
-        (role) =>
-            role.name.toLowerCase().includes(searchTerm) ||
-            role.description.toLowerCase().includes(searchTerm) ||
-            role.permissions.some((perm) => perm.toLowerCase().includes(searchTerm))
+    const filteredRoles = roles.filter((role) =>
+        Object.values(role).some((value) => {
+            if (Array.isArray(value)) {
+                return value.some((item) =>
+                    item.toString().toLowerCase().includes(searchTerm)
+                );
+            }
+            return value.toString().toLowerCase().includes(searchTerm);
+        })
+    );
+
+    // Calcular los roles que se mostrarán en la página actual
+    const displayedRoles = filteredRoles.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
     );
 
     // Manejar cambio de página
@@ -41,12 +51,6 @@ const RolesTable = ({
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0); // Reiniciar a la primera página
     };
-
-    // Calcular los roles que se mostrarán en la página actual
-    const displayedRoles = filteredRoles.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
-    );
 
     // Manejar selección de un rol
     const handleToggleRole = (roleId) => {
@@ -70,116 +74,6 @@ const RolesTable = ({
     const allSelected =
         displayedRoles.length > 0 &&
         selectedRoles.length === displayedRoles.length;
-
-    // Componente interno para una fila de la tabla (RoleRow)
-    const RoleRow = ({
-        role,
-        isSelected,
-        onToggleRole,
-    }) => {
-        const startEditing = () => {
-            setEditingRoleId(role.id);
-            setEditValues({ name: role.name, description: role.description });
-        };
-
-        const cancelEditing = () => {
-            setEditingRoleId(null);
-            setEditValues({ name: '', description: '' });
-        };
-
-        const saveEditing = () => {
-            setRoles((prevRoles) =>
-                prevRoles.map((r) =>
-                    r.id === role.id
-                        ? { ...r, name: editValues.name, description: editValues.description }
-                        : r
-                )
-            );
-            updateRole(role.id, {
-                nombre_rol: editValues.name,
-                descripcion_rol: editValues.description,
-            });
-            setEditingRoleId(null);
-        };
-
-        return (
-            <tr>
-                <td>
-                    <Checkbox checked={isSelected} onChange={onToggleRole} />
-                </td>
-                <td>{role.id}</td>
-                <td onDoubleClick={startEditing}>
-                    {editingRoleId === role.id ? (
-                        <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editValues.name}
-                            onChange={(e) =>
-                        setEditValues((prev) => ({ ...prev, name: e.target.value }))
-                            }
-                            autoFocus
-                        />
-                    ) : (
-                        role.name
-                    )}
-                </td>
-                <td onDoubleClick={startEditing}>
-                    {editingRoleId === role.id ? (
-                        <TextField
-                            variant="outlined"
-                            size="small"
-                            value={editValues.description}
-                            onChange={(e) =>
-                                setEditValues((prev) => ({
-                                    ...prev,
-                                    description: e.target.value,
-                                }))
-                            }
-                        />
-                    ) : (
-                        role.description
-                    )}
-                </td>
-                <td>
-                    <div className={styles.permissionsCell}>
-                        <span>{role.permissions.join(', ') || 'Sin permisos'}</span>
-                        <Tooltip title="Editar permisos">
-                            <IconButton
-                                className={styles.addPermissionButton}
-                                onClick={() => onOpenModal(role)}
-                            >
-                                <AddCircleOutlineIcon />
-                            </IconButton>
-                        </Tooltip>
-                    </div>
-                </td>
-                {editingRoleId === role.id && (
-                    <td>
-                        <div className={styles.botonesAceptCancel}>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                size="small"
-                                onClick={saveEditing}
-                                className={styles.buttonSave}
-                            >
-                                Guardar
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                color="secondary"
-                                size="small"
-                                onClick={cancelEditing}
-                                className={styles.buttonCancel}
-                            >
-                                Cancelar
-                            </Button>
-                        </div>
-                    </td>
-                )}
-            </tr>
-        );
-    };
 
     return (
         <div>
@@ -221,6 +115,13 @@ const RolesTable = ({
                             role={role}
                             isSelected={selectedRoles.includes(role.id)}
                             onToggleRole={() => handleToggleRole(role.id)}
+                            editingRoleId={editingRoleId}
+                            setEditingRoleId={setEditingRoleId}
+                            editValues={editValues}
+                            setEditValues={setEditValues}
+                            updateRole={updateRole}
+                            setRoles={setRoles}
+                            onOpenModal={onOpenModal}
                         />
                     ))}
                 </tbody>

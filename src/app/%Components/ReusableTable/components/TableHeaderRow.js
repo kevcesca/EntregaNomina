@@ -3,26 +3,32 @@ import PropTypes from "prop-types";
 import { TableRow, TableCell, Checkbox } from "@mui/material";
 import styles from "../ReusableTable.module.css";
 
-const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRows }) => (
-    <TableRow>
-        <TableCell padding="checkbox" className={styles.tableCell} >
-            <Checkbox
-                indeterminate={
-                    selectedRows.length > 0 && selectedRows.length < data.length
-                }
-                checked={data.length > 0 && selectedRows.length === data.length}
-                onChange={(event) =>
-                    setSelectedRows(event.target.checked ? data.map((row) => row) : [])
-                }
-            />
-        </TableCell>
-        {columns.map((col, index) => (
-            <TableCell key={index} className={`${styles.tableCell} ${styles.tableHeader}`}>
-                {col.label || col}
+const TableHeaderRow = ({ columns, deletable, data, selectedRows, setSelectedRows }) => {
+    const handleSelectAll = (event) => {
+        if (event.target.checked) {
+            setSelectedRows(data); // Guarda todas las filas visibles
+        } else {
+            setSelectedRows([]); // Deselecciona todas
+        }
+    };
+
+    return (
+        <TableRow>
+            <TableCell padding="checkbox" className={styles.tableCell}>
+                <Checkbox
+                    indeterminate={selectedRows.length > 0 && selectedRows.length < data.length}
+                    checked={selectedRows.length === data.length}
+                    onChange={handleSelectAll}
+                />
             </TableCell>
-        ))}
-    </TableRow>
-);
+            {columns.map((col, index) => (
+                <TableCell key={index} className={`${styles.tableCell} ${styles.tableHeader}`}>
+                    {col.label || col}
+                </TableCell>
+            ))}
+        </TableRow>
+    );
+};
 
 TableHeaderRow.propTypes = {
     columns: PropTypes.array.isRequired,

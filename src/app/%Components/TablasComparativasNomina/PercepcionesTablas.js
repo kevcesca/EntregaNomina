@@ -20,7 +20,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ExportModal from '../ReusableTableDepositoResumen/components/ExportModal';
 import axios from 'axios';
 import { Toast } from 'primereact/toast';
-import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css"
+import styles from "../ReusableTableDepositoResumen/ReusableTableDepositoResumen.module.css";
 import API_BASE_URL from '../../%Config/apiConfig';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -45,6 +45,10 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
     const [isLoading, setIsLoading] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
     const toastRef = useRef(null);
+    const [extraExportData, setExtraExportData] = useState(null);
+    const [isMassSelection, setIsMassSelection] = useState(false);
+
+
 
     useEffect(() => {
         if (anio && quincena && nombreNomina) {
@@ -71,7 +75,7 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
 
             const cleanData = filtered.map((row) => ({
                 ...row,
-                percepciones: parseFloat(row.percepciones.replace(/,/g, '')),
+                percepciones: parseFloat(row.percepciones?.replace(/,/g, '') || 0), // Inicializa en 0 si está vacío
             }));
 
             setData(cleanData);
@@ -89,43 +93,81 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
     };
 
     useEffect(() => {
-        const filtered = data.filter((row) =>
-            columns.some((col) =>
-                String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
-            )
-        );
-        setFilteredData(filtered);
+        if (!searchQuery.trim()) {
+            setFilteredData(data);
+            setSelectedRows([]); // 🔴 Reinicia los checkboxes al borrar la búsqueda
+        } else {
+            setFilteredData(data.filter(row =>
+                columns.some(col =>
+                    String(row[col.accessor] || '').toLowerCase().includes(searchQuery.toLowerCase())
+                )
+            ));
+            setSelectedRows([]); // 🔴 Borra la selección al hacer una nueva búsqueda
+        }
     }, [searchQuery, data]);
 
+
     const handleSelectRow = (row) => {
-        setSelectedRows((prev) =>
-            prev.includes(row) ? prev.filter((r) => r !== row) : [...prev, row]
-        );
+        setSelectedRows((prev) => {
+            const rowKey = `${row.sectpres}-${row.nomina}-${row.id_concepto}`;
+            const isSelected = prev.some((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto}` === rowKey);
+
+            if (isSelected) {
+                // Si se deselecciona una fila, se desactiva selección masiva
+                const newSelection = prev.filter((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto}` !== rowKey);
+                if (newSelection.length !== filteredData.length) {
+                    setIsMassSelection(false);
+                }
+                return newSelection;
+            } else {
+                return [...prev, row];
+            }
+        });
     };
 
+
+
     const handleSelectAll = (checked) => {
-        const visibleRows = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
         if (checked) {
-            const newSelection = [...selectedRows, ...visibleRows.filter((row) => !selectedRows.includes(row))];
-            setSelectedRows(newSelection);
+            // ✅ Selecciona todos los elementos de filteredData (todas las páginas)
+            setSelectedRows(filteredData);
+            setIsMassSelection(true);
         } else {
-            const newSelection = selectedRows.filter((row) => !visibleRows.includes(row));
-            setSelectedRows(newSelection);
+            // ❌ Desmarca todos los elementos
+            setSelectedRows([]);
+            setIsMassSelection(false);
         }
     };
+
+
+
+
+
+
 
     const handleExportModalOpen = () => {
         if (selectedRows.length === 0) {
             toastRef.current.show({
-                severity: 'warn',
-                summary: 'Advertencia',
-                detail: 'Selecciona al menos una fila para exportar.',
+                severity: "warn",
+                summary: "Advertencia",
+                detail: "Selecciona al menos una fila para exportar.",
                 life: 3000,
             });
             return;
         }
+
+        // ✅ Agrega el total solo si se seleccionaron todas las filas
+        const extraData = selectedRows.length === filteredData.length
+            ? { sectpres: "TOTAL", nomina: "", id_concepto: "", nombre_concepto: "TOTAL PERCEPCIONES", percepciones: totalPercepciones }
+            : null;
+
+        setExtraExportData(extraData);
         setIsExportModalOpen(true);
     };
+
+
+
+
 
     const handleExportExcel = () => {
         const worksheetData = selectedRows.map((row) => ({
@@ -159,6 +201,8 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
 
         doc.save(`Percepciones_${anio}_${quincena}.pdf`);
     };
+
+    const totalPercepciones = data.reduce((sum, row) => sum + (row.percepciones || 0), 0);
 
     return (
         <Paper className={styles.container}>
@@ -197,27 +241,24 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell padding="checkbox">
+                            <TableCell padding="checkbox" className={styles.tableHeaderCheckbox}>
                                 <Checkbox
-                                    indeterminate={
-                                        selectedRows.length > 0 &&
-                                        filteredData
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .some((row) => !selectedRows.includes(row))
-                                    }
-                                    checked={
-                                        filteredData
-                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                            .every((row) => selectedRows.includes(row))
-                                    }
+                                    indeterminate={selectedRows.length > 0 && selectedRows.length < filteredData.length}
+                                    checked={selectedRows.length === filteredData.length}
                                     onChange={(e) => handleSelectAll(e.target.checked)}
+                                    sx={{}}
                                 />
+
                             </TableCell>
                             {columns.map((col) => (
-                                <TableCell key={col.accessor}>{col.label}</TableCell>
+                                <TableCell key={col.accessor} className={styles.tableHeader}>
+                                    {col.label}
+                                </TableCell>
                             ))}
                         </TableRow>
                     </TableHead>
+
+
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
@@ -235,20 +276,22 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                             filteredData
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row) => (
-                                    <TableRow key={row.id_concepto}>
+                                    <TableRow key={`${row.sectpres}-${row.nomina}-${row.id_concepto}-${row.nombre_concepto}`}>
+
                                         <TableCell padding="checkbox">
                                             <Checkbox
-                                                checked={selectedRows.includes(row)}
+                                                checked={selectedRows.some((r) => `${r.sectpres}-${r.nomina}-${r.id_concepto}` === `${row.sectpres}-${row.nomina}-${row.id_concepto}`)}
                                                 onChange={() => handleSelectRow(row)}
                                             />
                                         </TableCell>
+
                                         {columns.map((col) => (
                                             <TableCell key={col.accessor}>
                                                 {col.accessor === 'percepciones'
-                                                    ? row[col.accessor].toLocaleString('en-US', {
-                                                          style: 'currency',
-                                                          currency: 'USD',
-                                                      })
+                                                    ? (row[col.accessor] || 0).toLocaleString('en-US', {
+                                                        style: 'currency',
+                                                        currency: 'USD',
+                                                    })
                                                     : row[col.accessor] || '-'}
                                             </TableCell>
                                         ))}
@@ -259,6 +302,10 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 </Table>
             </TableContainer>
 
+            <div style={{ padding: '1rem', textAlign: "left" }}>
+                <h3>Total Percepciones: {totalPercepciones.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</h3>
+            </div>
+
             <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 count={filteredData.length}
@@ -268,12 +315,18 @@ export default function PercepcionesTabla({ anio, quincena, nombreNomina, subTip
                 onRowsPerPageChange={(e) => setRowsPerPage(parseInt(e.target.value, 10))}
             />
 
+
+
             <ExportModal
                 open={isExportModalOpen}
                 onClose={() => setIsExportModalOpen(false)}
                 selectedRows={selectedRows}
                 columns={columns}
+                extraData={extraExportData} // ✅ Solo se envía si hubo selección masiva
             />
+
+
+
         </Paper>
     );
 }

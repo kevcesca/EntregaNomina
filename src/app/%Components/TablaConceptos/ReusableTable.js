@@ -37,8 +37,11 @@ const ReusableTable = ({
     const [newRowData, setNewRowData] = useState({});
     const [isExportModalOpen, setExportModalOpen] = useState(false);
     const [data, setData] = useState([]); // Estado para los datos de la tabla
+    // const [filteredData, setFilteredData] = useState({});
     const toast = useRef(null); // Referencia para el Toast
     const [searchQuery, setSearchQuery] = useState("");
+    // const columns = props.columns || [];
+
 
     // Obtener los datos al cargar el componente
     useEffect(() => {
@@ -51,6 +54,20 @@ const ReusableTable = ({
                 });
         }
     }, [fetchData]);
+
+    // {filteredData.map((row) =>
+    //     row ? (
+    //         <TableRowComponent
+    //             key={row.id || row.id_concepto}
+    //             row={row}
+    //             columns={columns}
+    //             editable={editable}
+    //             handleSelectRow={handleSelectRow}
+    //             selectedRows={selectedRows}
+    //         />
+    //     ) : null
+    // )}
+    
 
     // Iniciar creación de una nueva fila
     const handleCreate = () => {
@@ -126,39 +143,43 @@ const ReusableTable = ({
 
     // Función para eliminar filas seleccionadas
     const handleDeleteSelected = () => {
-        if (onDelete && selectedRows.length > 0) {
-            // Ahora usamos únicamente row.id 
-            const deletePromises = selectedRows.map((row) => onDelete(row.id));
-    
-            Promise.all(deletePromises)
-                .then((results) => {
-                    const allDeleted = results.every((result) => result); 
-                    if (allDeleted) {
-                        toast.current.show({
-                            severity: 'success',
-                            summary: 'Éxito',
-                            detail: 'Elementos eliminados correctamente',
-                            life: 3000,
-                        });
-                    } else {
-                        toast.current.show({
-                            severity: 'warn',
-                            summary: 'Advertencia',
-                            detail: 'Algunos elementos no se pudieron eliminar',
-                            life: 3000,
-                        });
-                    }
-                    fetchData().then((response) => setData(response)); // Refresca los datos
-                    setSelectedRows([]); // Limpia la selección
-                })
-                .catch((error) => {
-                    console.error("Error deleting rows:", error);
-                    showErrorToast(error); // Muestra mensaje de error
+    if (onDelete && selectedRows.length > 0) {
+        // Elimina las filas seleccionadas por su ID
+        const deletePromises = selectedRows.map((id) => 
+            onDelete(id) // Cambia a usar solo IDs
+        );
+
+        Promise.all(deletePromises)
+            // .then(() => {
+            //     toast.current.show({
+            //         severity: "success",
+            //         summary: "Éxito",
+            //         detail: "Filas eliminadas correctamente.",
+            //         life: 3000,
+            //     });
+
+            //     // Refresca los datos después de eliminar
+            //     fetchData().then((response) => setData(response));
+            //     setSelectedRows([]); // Limpia la selección
+            // })
+            .catch((error) => {
+                console.error("Error al eliminar:", error);
+                toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: "No se pudieron eliminar algunas filas.",
+                    life: 3000,
                 });
-        } else {
-            console.error("onDelete prop is not defined or no rows selected");
-        }
-    };    
+            });
+    } else {
+        toast.current.show({
+            severity: "warn",
+            summary: "Advertencia",
+            detail: "No hay filas seleccionadas para eliminar.",
+            life: 3000,
+        });
+    }
+};
 
     // Manejar la apertura y cierre del modal de exportación
     const handleExportModalOpen = () => {
@@ -174,92 +195,84 @@ const ReusableTable = ({
     };
 
     const handleSelectRow = (row) => {
-        setSelectedRows((prevSelected) => {
-            // Usa row.id para verificar si ya está en la lista
-            const isSelected = prevSelected.some(selected => selected.id === row.id);
-            if (isSelected) {
-                // Quitar de la lista
-                return prevSelected.filter(selected => selected.id !== row.id);
-            } else {
-                // Agregar a la lista
-                return [...prevSelected, row];
-            }
-        });
+        const rowId = row?.id || row?.id_concepto; // Obtén el identificador
+        if (!rowId) return; // Si no tiene ID, no hacemos nada
+    
+        setSelectedRows((prevSelectedRows) =>
+            prevSelectedRows.includes(rowId)
+                ? prevSelectedRows.filter((id) => id !== rowId) // Deseleccionar
+                : [...prevSelectedRows, rowId] // Seleccionar
+        );
     };
-
+    
+    
+    
     const handleSelectAll = (event) => {
         if (event.target.checked) {
-            setSelectedRows(filteredData); // Guarda todas las filas visibles
+            const validRowIds = filteredData
+                .filter((row) => row && (row.id || row.id_concepto)) // Filtra filas válidas
+                .map((row) => row.id || row.id_concepto); // Extrae IDs válidos
+    
+            setSelectedRows(validRowIds);
         } else {
-            setSelectedRows([]); // Deselecciona todas
+            setSelectedRows([]); // Deselecciona todo
         }
     };
+    
+    
+    const filteredData = Array.isArray(data)
+    ? data.filter((row) =>
+          columns.some((col) =>
+              ((row && row[col.accessor]) || "")
+                  .toString()
+                  .toLowerCase()
+                  .includes(searchQuery.toLowerCase())
+          )
+      )
+    : []; // Valor predeterminado si data no está definido
 
-    // Filtrar datos según la búsqueda
-    const filteredData = data.filter((row) =>
-        columns.some((col) =>
-            (row[col.accessor] || "")
-                .toString()
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-        )
+    
+    const selectedData = filteredData.filter((row) =>
+        selectedRows.includes(row.id || row.id_concepto) // Verifica IDs válidos
     );
 
     // Función para mostrar el toast de error personalizado
     const showErrorToast = (error) => {
         let mensajeCorto = "Error desconocido";
-        let statusCode = null; // Variable para almacenar el código de estado
-
+        let statusCode = null;
+    
         if (error.response) {
-            // El servidor respondió con un código de estado fuera del rango 2xx
             statusCode = error.response.status;
-            mensajeCorto = `Error ${statusCode}: ${error.message}`; // Mensaje con código de estado
+            mensajeCorto = `Error ${statusCode}: ${error.message}`;
+    
+            // 🛑 Si el error es de clave duplicada, mostrar mensaje genérico
+            if (
+                error.response.data?.message?.includes("llave duplicada") ||
+                error.response.data?.message?.includes("duplicate key")
+            ) {
+                mensajeCorto = "Este registro ya existe. Intenta con otro valor.";
+            }
+        } else if (error.message.includes("llave duplicada") || error.message.includes("duplicate key")) {
+            mensajeCorto = "Este registro ya existe. Intenta con otro valor.";
         } else if (error.request) {
-            // La solicitud fue hecha pero no se recibió respuesta
-            mensajeCorto = "Error: No se recibió respuesta del servidor";
+            mensajeCorto = "Error: No se recibió respuesta del servidor.";
         } else {
-            // Error en la configuración de la solicitud
             mensajeCorto = error.message;
         }
-
-        toast.current.show({
-            severity: 'error',
-            summary: 'Error',
-            detail: (
-                <div>
-                    {mensajeCorto}
-                    <Button
-                        variant="text"
-                        color="inherit"
-                        size="small"
-                        onClick={() => {
-                            toast.current.clear();
-                            toast.current.show({
-                                severity: 'error',
-                                summary: 'Detalles del Error',
-                                detail: (
-                                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                                        {statusCode && <div>Código de estado: {statusCode}</div>}
-                                        {error.message}
-                                        {error.response && (
-                                            <>
-                                                <br />
-                                                <pre>{JSON.stringify(error.response, null, 2)}</pre>
-                                            </>
-                                        )}
-                                    </div>
-                                ),
-                                life: 10000,
-                            });
-                        }}
-                    >
-                        Ver más
-                    </Button>
-                </div>
-            ),
-            life: 5000,
-        });
+    
+        // ✅ Mostrar solo el mensaje filtrado en el toast
+        setTimeout(() => {
+            if (toast.current) {
+                toast.current.show({
+                    severity: "error",
+                    summary: "Error",
+                    detail: mensajeCorto,
+                    life: 5000,
+                });
+            }
+        }, 200);
     };
+    
 
     return (
         <Paper className={styles.tableContainer}>
@@ -280,11 +293,12 @@ const ReusableTable = ({
                     <TableHeaderRow
                         columns={columns}
                         deletable={deletable}
-                        data={filteredData} // Aquí se pasa filteredData
+                        data={data} // Puedes mantener el dataset completo si lo necesitas
+                        filteredData={filteredData} // Pasamos las filas visibles                        selectedRows={selectedRows}
                         selectedRows={selectedRows}
                         setSelectedRows={setSelectedRows}
+                        handleSelectAll={handleSelectAll}
                     />
-
                     <TableBody>
                         {creatingRow && (
                             <TableRowComponent
@@ -305,7 +319,7 @@ const ReusableTable = ({
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => (
                                 <TableRowComponent
-                                    key={row.id}
+                                    key={row.id_concepto || row.id}
                                     row={row}
                                     columns={columns}
                                     editable={editable}
@@ -336,7 +350,7 @@ const ReusableTable = ({
             <ExportModal
                 open={isExportModalOpen}
                 onClose={handleExportModalClose}
-                selectedRows={selectedRows}
+                selectedRows={selectedData}
                 columns={columns}
             />
         </Paper>

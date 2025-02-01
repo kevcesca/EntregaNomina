@@ -23,6 +23,10 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [isProcessed, setIsProcessed] = useState(false);
+    const [uploadedFiles, setUploadedFiles] = useState([]);
+    const [fileToUpload, setFileToUpload] = useState(null); // Estado para manejar el archivo seleccionado
+
+
 
 
     useEffect(() => {
@@ -34,7 +38,6 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             const response = await axios.get(`${API_BASE_URL}/consultaNominaCtrl/filtro`, {
                 params: { anio, quincena },
             });
-
 
             const data = response.data
                 .filter(item => item.nombre_nomina === 'Compuesta')
@@ -50,6 +53,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 }));
 
             setArchivos(data);
+            setUploadedFiles(data.map(file => file.nombreArchivo).filter(name => name !== 'Vacío')); // ✅ Ahora se actualiza después de subir archivos
             setIsUploadDisabled(data.length >= 2);
             setCanProcess(data.length >= 2);
             setIsProcessed(data.some((archivo) => archivo.aprobado && archivo.aprobado2));
@@ -65,6 +69,8 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
         }
     };
 
+
+
     const formatDate = (value) => {
         if (!value) return '';
         const date = new Date(value);
@@ -72,121 +78,131 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
     };
 
     const handleFileUpload = async () => {
-        if (filesToUpload.length !== 2) return; // Validamos que haya 2 archivos antes de proceder
-        setIsLoading(true); // Mostramos animación de carga
+        if (filesToUpload.length === 0) {
+            toast.current.show({
+                severity: 'warn',
+                summary: 'Advertencia',
+                detail: 'No hay archivos seleccionados para subir.',
+                life: 3000,
+            });
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
-            for (const file of filesToUpload) { // Subimos cada archivo individualmente
+            for (const file of filesToUpload) { // 🔥 Se suben archivos de uno en uno
                 const formData = new FormData();
                 formData.append('file', file);
-                formData.append('extra', '');
+                formData.append('quincena', quincena);
+                formData.append('anio', anio);
+                formData.append('tipo', 'Compuesta');
+                formData.append('usuario', session || 'unknown');
+                formData.append('extra', ''); // 🔥 Se mantiene este campo por seguridad
 
-                const uploadURL = `${API_BASE_URL}/SubirNomina?quincena=${quincena}&anio=${String(anio)}&tipo=Compuesta&usuario=${session || 'unknown'}`;
+                console.log(`Subiendo archivo: ${file.name}`);
 
-                await axios.post(uploadURL, formData, {
+                await axios.post(`${API_BASE_URL}/SubirNomina`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
-                    onUploadProgress: (progressEvent) => {
-                        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                        setProgress(progress);
-                    },
                 });
             }
 
-            setProgress(100);
-            setUploaded(true);
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
-                detail: 'Archivos subidos correctamente.',
+                detail: `Se subieron ${filesToUpload.length} archivo(s) correctamente.`,
                 life: 3000,
             });
 
-            setFilesToUpload([]); // Limpiamos los archivos seleccionados
-            setIsUploadDialogOpen(false); // Cerramos el modal
-            fetchArchivosData(); // Refrescamos los datos
+            await fetchArchivosData(); // 🔄 Se actualiza la tabla después de la subida
         } catch (error) {
-            console.error('Error uploading files', error);
+            console.error('Error al subir archivos:', error);
             toast.current.show({
                 severity: 'error',
-                summary: 'Error al Subir Archivos',
+                summary: 'Error',
                 detail: 'Hubo un error al subir los archivos.',
                 life: 5000,
             });
         } finally {
-            setIsLoading(false); // Ocultamos la animación de carga
+            setFilesToUpload([]); // ✅ Limpia la lista de archivos
+            setIsUploadDialogOpen(false); // ✅ Cierra el modal
+            setIsLoading(false);
         }
     };
+
+
+
+
+
+
+
+
+
 
 
     const handleDeleteFile = async () => {
-        if (!fileToDelete || !fileToDelete.idx) { // Validamos que existe un archivo y tiene un `idx`
+        if (!fileToDelete || !fileToDelete.idx) return;
+
+        setIsLoading(true);
+
+        try {
+            await axios.get(`${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`);
+
             toast.current.show({
-                severity: 'warn',
-                summary: 'Advertencia',
-                detail: 'No se encontró un identificador válido para el archivo.',
+                severity: 'success',
+                summary: 'Éxito',
+                detail: 'Archivo eliminado correctamente.',
                 life: 3000,
             });
-            return;
-        }
-    
-        setIsLoading(true); // Mostramos el overlay de carga mientras se procesa la eliminación
-    
-        try {
-            // Construimos la URL con el parámetro `idx`
-            const deleteURL = `${API_BASE_URL}/eliminarNomina?idx=${fileToDelete.idx}`;
-    
-            // Realizamos la solicitud como `GET`
-            const response = await axios.get(deleteURL);
-    
-            // Validamos la respuesta
-            if (response.status === 200 && response.data.includes('eliminado correctamente')) {
-                toast.current.show({
-                    severity: 'success',
-                    summary: 'Éxito',
-                    detail: 'Archivo eliminado correctamente.',
-                    life: 3000,
-                });
-    
-                // Refrescamos los datos y cerramos el modal
-                setFileToDelete(null); // Limpiamos el archivo seleccionado
-                setIsDeleteDialogOpen(false); // Cerramos el modal
-                fetchArchivosData(); // Refrescamos la tabla
-            } else {
-                throw new Error(response.data || 'No se pudo eliminar el archivo.');
-            }
+
+            setIsDeleteDialogOpen(false); // 🔥 Cierra el modal después de eliminar el archivo
+            setFileToDelete(null); // 🔥 Limpia el estado del archivo a eliminar
+
+            await fetchArchivosData();  // 🔄 Refresca la tabla
+            setIsUploadDisabled(false);  // ✅ Habilita la subida nuevamente
         } catch (error) {
-            console.error('Error al eliminar el archivo:', error);
-    
-            // Mostramos un mensaje de error en caso de fallo
-            const errorMessage =
-                error.response?.data || 'Hubo un problema al intentar eliminar el archivo.';
             toast.current.show({
                 severity: 'error',
-                summary: 'Error al eliminar',
-                detail: errorMessage,
+                summary: 'Error',
+                detail: 'No se pudo eliminar el archivo.',
                 life: 5000,
             });
         } finally {
-            setIsLoading(false); // Ocultamos el overlay de carga
+            setIsLoading(false);
         }
     };
-    
-    
-    
+
+
+
+    // 🔥 SOLUCIÓN: Forzar actualización del `input` antes de seleccionar un archivo
     const handleFileSelection = (event) => {
-        const selectedFiles = Array.from(event.target.files); // Convertimos FileList a Array
-        if (selectedFiles.length !== 2) { // Validamos que sean exactamente 2 archivos
+        const selectedFiles = Array.from(event.target.files);
+
+        if (uploadedFiles.length + selectedFiles.length > 2) { // 🔥 Evita subir más de 2 archivos
             toast.current.show({
                 severity: 'warn',
                 summary: 'Advertencia',
-                detail: 'Debes seleccionar exactamente 2 archivos.',
+                detail: 'Solo puedes subir hasta 2 archivos.',
                 life: 3000,
             });
             return;
         }
-        setFilesToUpload(selectedFiles); // Guardamos los archivos seleccionados
-        setIsUploadDialogOpen(true); // Abrimos el modal de confirmación
+
+        setFilesToUpload(selectedFiles); // 🔥 Se reemplaza en lugar de hacer un push
+
+        setIsUploadDialogOpen(true);
+
+        event.target.value = null; // 🔥 Reset para permitir volver a seleccionar los mismos archivos
     };
+
+
+
+
+
+
+
+
+
 
 
 
@@ -198,7 +214,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                 params: { idx }, // Usamos idx para identificar el archivo
                 responseType: 'blob', // Para manejar descargas de archivos
             });
-    
+
             // Crear un enlace para descargar el archivo
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
@@ -207,7 +223,7 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             document.body.appendChild(link);
             link.click();
             link.parentNode.removeChild(link);
-    
+
             toast.current.show({
                 severity: 'success',
                 summary: 'Éxito',
@@ -224,21 +240,21 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             });
         }
     };
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
 
     const handleProcesarNomina = async () => {
         setIsProcessing(true);
         try {
             const usuario = session || 'unknown';
             const endpoint = `${API_BASE_URL}/SubirNomina/dataBase?quincena=${quincena}&anio=${anio}&tipo=Compuesta&usuario=${usuario}&extra=gatitoverdecito`;
-    
+
             const response = await axios.get(endpoint);
-    
+
             if (response.status === 200) {
                 toast.current.show({
                     severity: 'success',
@@ -246,14 +262,14 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                     detail: 'Nómina procesada correctamente.',
                     life: 3000,
                 });
-    
+
                 // Actualizar archivos: procesados pero no aprobados
                 const updatedArchivos = archivos.map((archivo) => ({
                     ...archivo,
                     aprobado: false, // Deshabilita descarga
                     aprobado2: false, // Deshabilita descarga
                 }));
-    
+
                 setArchivos(updatedArchivos); // Actualiza el estado local
                 setIsProcessed(true); // Deshabilita "Procesar Nómina"
             } else {
@@ -270,17 +286,17 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             setIsProcessing(false); // Oculta el overlay de carga
         }
     };
-    
-    
-    
-    
-    
+
+
+
+
+
 
 
     const descargaTemplate = (rowData) => {
         // Deshabilitar descarga si no está aprobado
         const isDisabled = !rowData.aprobado || !rowData.aprobado2;
-    
+
         return (
             <button
                 className={styles.downloadButton}
@@ -292,15 +308,15 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             </button>
         );
     };
-    
-    
-    
-    
+
+
+
+
 
     const deleteTemplate = (rowData) => {
         // Deshabilitar eliminación si el archivo está aprobado
         const isDisabled = rowData.aprobado && rowData.aprobado2;
-    
+
         return (
             <button
                 className={`${styles.deleteButton} ${isDisabled ? styles.disabledButton : ''}`}
@@ -315,12 +331,13 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
             </button>
         );
     };
-    
-    
-    
+
+
+
 
     const handleConfirmUpload = async () => {
         setIsUploadDialogOpen(false); // Cierra el modal
+        setFilesToUpload([]); // 🔥 Limpia la lista de archivos seleccionados
         if (!fileToUpload) return;
 
         setIsLoading(true); // Activa el overlay de carga
@@ -391,52 +408,57 @@ export default function TablaPostNomina({ quincena, anio, session, setProgress, 
                     <Button
                         variant="contained"
                         component="label"
-                        className={styles.uploadButton}
-                        disabled={isUploadDisabled}
+                        disabled={uploadedFiles.length >= 2}  // ✅ Bloquea si ya hay 2 archivos
                     >
-                        Subir Nomina Compuesta
-                        <input
-                            type="file"
-                            hidden
-                            multiple // Permitir múltiples archivos
-                            onChange={handleFileSelection} // Nuevo manejador para la selección de archivos
-                            accept=".xlsx"
-                        />
+                        Subir Nómina Compuesta
+                        <input type="file" hidden onChange={handleFileSelection} accept=".xlsx" multiple />  {/* ✅ Ahora permite subir 2 archivos */}
                     </Button>
 
 
 
-                    {canProcess && (
+
+
+                    {uploadedFiles.length === 2 && (
                         <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={handleProcesarNomina}
-                        className={styles.procesarButton}
-                        style={{ marginTop: '1rem' }}
-                        disabled={isProcessed} // Deshabilitado si ya está procesado
-                    >
-                        Procesar Nómina
-                    </Button>
-                    
+                            variant="contained"
+                            color="primary"
+                            onClick={handleProcesarNomina}
+                            disabled={isProcessed}
+                        >
+                            Procesar Nómina
+                        </Button>
                     )}
+
                 </div>
             </LoadingOverlay>
 
-            <Dialog open={isUploadDialogOpen} onClose={() => setIsUploadDialogOpen(false)}>
+            <Dialog open={isUploadDialogOpen} onClose={() => {
+                setIsUploadDialogOpen(false);
+                setFilesToUpload([]); // 🔥 Limpia archivos cuando se cierra sin subir
+            }}>
                 <DialogTitle>¿Desea subir los archivos seleccionados?</DialogTitle>
                 <div style={{ padding: '1rem' }}>
                     <p>Archivos seleccionados:</p>
                     <ul>
-                        {filesToUpload.map((file, index) => (
-                            <li key={index}>{file.name}</li>
-                        ))}
+                        {filesToUpload.length > 0 ? (
+                            filesToUpload.map((file, index) => <li key={index}>{file.name}</li>)
+                        ) : (
+                            <p>No hay archivos seleccionados</p>
+                        )}
                     </ul>
                 </div>
                 <DialogActions>
-                    <Button onClick={() => setIsUploadDialogOpen(false)}>Cancelar</Button>
+                    <Button onClick={() => {
+                        setIsUploadDialogOpen(false);
+                        setFilesToUpload([]); // 🔥 También limpia al cancelar
+                    }}>Cancelar</Button>
                     <Button onClick={handleFileUpload} color="primary">Subir</Button>
                 </DialogActions>
             </Dialog>
+
+
+
+
 
 
         </div>

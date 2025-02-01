@@ -133,9 +133,14 @@ form .MuiButton-root {
 
 .sticky{
     margin-right: 15rem !important;
+    font-size: .9rem !important;
 }
 
 .buttons{
     display: flex;
     justify-content: space-between;
+}
+
+.front{
+    z-index: 1000 !important;
 }

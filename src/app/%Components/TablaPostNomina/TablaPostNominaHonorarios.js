@@ -47,9 +47,16 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                 }));
 
             setArchivos(data);
-            setIsUploadDisabled(data.length >= 1);
-            setCanProcess(data.length >= 1);
-            setIsProcessed(data.some((archivo) => archivo.aprobado && archivo.aprobado2));
+            setIsUploadDisabled(data.length >= 1); // 🔥 Solo permite subir 1 archivo
+
+            // 🔥 Si no hay archivos, permitir la subida
+            if (data.length === 0) {
+                setIsUploadDisabled(false);
+            }
+
+            setCanProcess(data.length >= 1); // Habilita el botón de "Procesar Nómina"
+            setIsProcessed(data.some(archivo => archivo.aprobado && archivo.aprobado2));
+
         } catch (error) {
             console.error('Error fetching archivos data', error);
             toast.current.show({
@@ -61,13 +68,18 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
         }
     };
 
-    const handleFileSelection = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
 
-        setFileToUpload(file);
+    const handleFileSelection = (event) => {
+        const selectedFile = event.target.files[0];
+        if (!selectedFile) return;
+
+        setFileToUpload(selectedFile);
         setIsUploadDialogOpen(true);
+
+        // 🔥 Forzar actualización del input para permitir subir el mismo archivo después de eliminarlo
+        event.target.value = null;
     };
+
 
     const handleFileUpload = async () => {
         if (!fileToUpload) return;
@@ -98,7 +110,10 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             });
 
             setUploaded(true);
-            fetchArchivosData();
+            setFileToUpload(null);
+            setIsUploadDialogOpen(false);
+            fetchArchivosData(); // 🔥 Recargar la tabla después de subir
+
         } catch (error) {
             console.error('Error uploading file', error);
             toast.current.show({
@@ -109,9 +124,9 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             });
         } finally {
             setIsLoading(false);
-            setFileToUpload(null);
         }
     };
+
 
     const handleFileDownload = async (idx, nombreArchivo) => {
         try {
@@ -164,7 +179,13 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
 
                 setFileToDelete(null);
                 setIsDeleteDialogOpen(false);
-                fetchArchivosData();
+                await fetchArchivosData(); // 🔄 Asegurar que la tabla se actualice correctamente
+
+                // 🔥 Habilitar nuevamente la subida después de eliminar
+                setTimeout(() => {
+                    setIsUploadDisabled(false);
+                }, 300);
+
             } else {
                 throw new Error(response.data || 'No se pudo eliminar el archivo.');
             }
@@ -180,6 +201,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
             setIsLoading(false);
         }
     };
+
 
     const handleProcesarNomina = async () => {
         setIsProcessing(true);
@@ -296,6 +318,7 @@ export default function TablaPostNominaHonorarios({ quincena, anio, session, set
                         </Button>
                     )}
                 </div>
+
             </LoadingOverlay>
 
             <Dialog open={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)}>
