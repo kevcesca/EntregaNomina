@@ -85,7 +85,6 @@ const VistaEdoCta = () => {
             />
 
             <Button
-                variant="contained"
                 color="primary"
                 startIcon={<ArrowBackIcon />}
                 onClick={() => (window.location.href = "/CargarEstadosCuenta")}
