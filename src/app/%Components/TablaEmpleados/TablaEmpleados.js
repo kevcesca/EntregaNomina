@@ -96,11 +96,15 @@ export default function EmpleadosTable() {
                     checkboxSelection // Habilita checkboxes al inicio de cada fila
                     onRowSelectionModelChange={(newSelection) => setSelectedRows(newSelection)} // Guarda las filas seleccionadas
                     sx={{
-                        '& .MuiDataGrid-columnHeaders': {
-                            backgroundColor: 'red',
-                            color: 'black',
+                        '& .MuiDataGrid-columnHeader': {
+                            backgroundColor: '#9b1d1d', // Aplica el color correcto a TODA la fila del encabezado
+                            color: 'white',
                             fontWeight: 'bold',
                         },
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            color: 'white',
+                            fontWeight: 'bold',
+                        }
                     }}
                 />
             </Box>

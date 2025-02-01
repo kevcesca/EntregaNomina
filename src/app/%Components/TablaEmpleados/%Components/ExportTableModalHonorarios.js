@@ -137,9 +137,9 @@ const ExportTableModal = ({ open, onClose, rows, columns }) => {
     };
 
     return (
-        <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="xl">
             <DialogTitle>Exportar Datos</DialogTitle>
-            <DialogContent className={styles.dialogContent}>
+            <DialogContent className={styles.dialogContent} sx={{ display: 'flex', gap: '1.5rem' }}>
                 <div style={{ flex: 1 }}>
                     <FormControl fullWidth>
                         <InputLabel>Formato</InputLabel>
@@ -167,13 +167,22 @@ const ExportTableModal = ({ open, onClose, rows, columns }) => {
                         />
                     ))}
                 </div>
-                <TableContainer>
-                    <Typography variant="h6">Vista Previa</Typography>
+                <TableContainer sx={{ flex: 2, border: '1px solid #ddd', borderRadius: '8px', padding: '1rem' }}>
+                    <Typography variant="h6" sx={{ marginBottom: '1rem', fontWeight: 'bold' }}>
+                        Vista Previa</Typography>
                     <Table>
                         <TableHead>
                             <TableRow>
                                 {selectedColumns.map(key => (
-                                    <TableCell key={key}>
+                                    <TableCell key={key}
+                                    sx={{ 
+                                        backgroundColor: '#9b1d1d', 
+                                        color: 'white', 
+                                        fontWeight: 'bold' ,
+                                        textAlign: "center",
+                                        whiteSpace: "nowrap",
+                                        wordBreak: 'break-word',
+                                        maxWidth: '200px'}}>
                                         {columns.find(col => col.key === key)?.label || key}
                                     </TableCell>
                                 ))}
@@ -183,7 +192,13 @@ const ExportTableModal = ({ open, onClose, rows, columns }) => {
                             {rows.map((row, index) => (
                                 <TableRow key={index}>
                                     {selectedColumns.map(key => (
-                                        <TableCell key={key}>{row[key] || '-'}</TableCell>
+                                        <TableCell key={key}
+                                        sx={{
+                                            textAlign: "left",
+                                            whiteSpace: "normal",
+                                            wordBreak: "break-word",
+                                            maxWidth: "150px", // Ajusta según tus necesidades
+                                        }}>{row[key] || '-'}</TableCell>
                                     ))}
                                 </TableRow>
                             ))}

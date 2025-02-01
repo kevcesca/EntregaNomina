@@ -18,9 +18,9 @@ export default function HonorariosTable() {
     const [selectedRows, setSelectedRows] = useState([]); // Estado para filas seleccionadas
 
     const availableColumns = [
-        { key: 'id', label: 'ID' },
+        { key: 'id', label: 'ID Honorarios' },
         { key: 'identificador', label: 'Identificador' },
-        { key: 'unidad_administrativa', label: 'Unidad Administrativa' },
+        { key: 'unidad_administrativa', label: 'U Administrativa' },
         { key: 'subprograma', label: 'Subprograma' },
         { key: 'nombre_empleado', label: 'Nombre Empleado' },
         { key: 'nombre_puesto', label: 'Nombre Puesto' },
@@ -28,7 +28,7 @@ export default function HonorariosTable() {
         { key: 'fecha_pago', label: 'Fecha de Pago' },
         { key: 'percepciones', label: 'Percepciones' },
         { key: 'deducciones', label: 'Deducciones' },
-        { key: 'liquido', label: 'Líquido' },
+        { key: 'liquido', label: ' Líquido ' },
         { key: 'forma_de_pago', label: 'Forma de Pago' },
     ];
 
@@ -84,6 +84,17 @@ export default function HonorariosTable() {
                     disableColumnMenu
                     disableColumnFilter
                     disableColumnSorting
+                    sx={{
+                        '& .MuiDataGrid-columnHeader': {
+                            backgroundColor: '#9b1d1d', // Aplica el color correcto a TODA la fila del encabezado
+                            color: 'white',
+                            fontWeight: 'bold',
+                        },
+                        '& .MuiDataGrid-columnHeaderTitle': {
+                            color: 'white',
+                            fontWeight: 'bold',
+                        }
+                    }}
                 />
             </Box>
             <br></br>
