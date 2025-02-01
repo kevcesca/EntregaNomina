@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { Box, Typography, Grid, TextField, Button, Alert } from "@mui/material";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL from "../../%Config/apiConfig"; // URL base para los servicios
 
 const ConsultaSaldosDiarios = () => {
@@ -110,7 +110,7 @@ const ConsultaSaldosDiarios = () => {
             </Button>
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchSaldosDiarios} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchSaldosDiarios} />
         </Box>
     );
 };

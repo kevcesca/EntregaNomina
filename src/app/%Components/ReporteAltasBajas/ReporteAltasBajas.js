@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { TextField, Button, Grid, Box, Typography, Alert } from "@mui/material";
-import ReusableTable from "../ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import ReusableTableSeleccion from "../ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL from "../../%Config/apiConfig"; // URL base para los servicios
 
 const MovimientosBitacora = () => {
@@ -128,7 +128,7 @@ const MovimientosBitacora = () => {
             </Grid>
 
             {/* Tabla de resultados */}
-            <ReusableTable
+            <ReusableTableSeleccion
                 columns={columns}
                 fetchData={fetchMovimientos} // Se ajusta para que dependa de `isConsultarPressed`
             />

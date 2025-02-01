@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Typography, Alert, Button, Grid, TextField, MenuItem, Select, FormControl, InputLabel } from "@mui/material";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable";
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion";
 import API_BASE_URL from "../../%Config/apiConfig";
 
 const ConsultaNominasExtraordinarias = () => {
@@ -110,7 +110,7 @@ const ConsultaNominasExtraordinarias = () => {
             </Button>
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchNominasExtraordinarias} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchNominasExtraordinarias} />
         </Box>
     );
 };

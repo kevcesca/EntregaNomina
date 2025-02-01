@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Box, Typography, TextField, Button, Grid, Alert } from "@mui/material";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL from "../../%Config/apiConfig"; // URL base para los servicios
 
 const ConsultaCLCMovimiento = () => {
@@ -40,7 +40,7 @@ const ConsultaCLCMovimiento = () => {
 
             const data = await response.json();
             console.log("Datos recibidos del servicio:", data); // Verificar los datos recibidos
-            return data; // Devolver los datos para que `ReusableTable` los procese
+            return data; // Devolver los datos para que `ReusableTableSeleccion` los procese
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             setError("No se pudo cargar la información. Por favor, verifica los parámetros.");
@@ -108,7 +108,7 @@ const ConsultaCLCMovimiento = () => {
             )}
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchCLCData} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchCLCData} />
         </Box>
     );
 };

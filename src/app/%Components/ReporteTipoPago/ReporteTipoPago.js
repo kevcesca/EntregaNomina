@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { TextField, Button, Grid, Box, Typography, Autocomplete, Alert } from "@mui/material";
-import ReusableTable from "../ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import ReusableTableSeleccion from "../ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig"; // URL base para los servicios
 import styles from './ReporteTipoPago.module.css';
 
@@ -135,7 +135,7 @@ const ReportesPage = () => {
             </Grid>
 
             {/* Tabla de resultados */}
-            <ReusableTable
+            <ReusableTableSeleccion
                 columns={columns}
                 fetchData={fetchReportes} // Se ajusta para que dependa de `isConsultarPressed`
             />

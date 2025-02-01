@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Box, Typography, Grid, TextField, Button, Autocomplete, Alert } from "@mui/material";
-import ReusableTable from "../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta según tu estructura
+import ReusableTableSeleccion from "../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según tu estructura
 import API_BASE_URL, { API_USERS_URL } from "../../%Config/apiConfig"; // URL base para los servicios
 
 const ConsultaAltas = () => {
@@ -117,7 +117,7 @@ const ConsultaAltas = () => {
             </Grid>
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchAltas} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchAltas} />
         </Box>
     );
 };
