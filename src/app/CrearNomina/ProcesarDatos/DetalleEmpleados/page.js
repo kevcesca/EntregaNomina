@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation"; // Hook para recuperar parámetros de la URL y navegación
-import { Box, Typography, Alert, Button } from "@mui/material";
-import ReusableTable from "../../../%Components/ReusableTable/ReusableTable"; // Ajusta la ruta según sea necesario
+import { useSearchParams } from "next/navigation"; // Hook para recuperar parámetros de la URL
+import { Box, Typography, Alert } from "@mui/material";
+import ReusableTableSeleccion from "../../../%Components/ReusableTableSeleccion/ReusableTableSeleccion"; // Ajusta la ruta según sea necesario
 import API_BASE_URL from "../../../%Config/apiConfig"; // URL base para los servicios
+import { useRouter } from "next/navigation"; 
+import { Button } from "@mui/material";
 
 const ConsultaEmpleados = () => {
     const [error, setError] = useState(null); // Estado de error
-    const router = useRouter(); // Hook para manejar navegación
 
     const searchParams = useSearchParams(); // Recupera los parámetros de la URL
 
@@ -17,6 +18,8 @@ const ConsultaEmpleados = () => {
     const quincena = searchParams.get("quincena");
     const nomina = searchParams.get("nomina");
     const banco = searchParams.get("banco");
+    const BackButton = () => {}
+    const router = useRouter();
 
     const columns = [
         { label: "Año", accessor: "ANIO" },
@@ -50,7 +53,7 @@ const ConsultaEmpleados = () => {
 
             const rawData = await response.json();
             console.log("Datos recibidos del servicio:", rawData); // Verificar los datos recibidos
-            return rawData; // Devolver los datos para que `ReusableTable` los procese
+            return rawData; // Devolver los datos para que `ReusableTableSeleccion` los procese
         } catch (error) {
             console.error("Error al obtener los datos:", error);
             setError("No se pudo cargar la información. Por favor, verifica los parámetros.");
@@ -72,19 +75,22 @@ const ConsultaEmpleados = () => {
             )}
 
             {/* Tabla de resultados */}
-            <ReusableTable columns={columns} fetchData={fetchEmpleados} />
+            <ReusableTableSeleccion columns={columns} fetchData={fetchEmpleados} />
 
-            {/* Botón para regresar */}
-            <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => router.back()} // Regresa a la página anterior
-                sx={{ marginTop: 3 }}
-            >
-                Regresar
-            </Button>
+            <Button 
+            sx={{marginTop: "1rem"}}
+            variant="contained" 
+            color="secondary" 
+            onClick={() => router.back()} // 🔙 Regresa a la página anterior
+        >
+            Regresar
+        </Button>
+    
         </Box>
+
+        
     );
 };
+
 
 export default ConsultaEmpleados;
